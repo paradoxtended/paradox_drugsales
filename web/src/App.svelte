@@ -62,6 +62,7 @@ if (isEnvBrowser()) {
 function closeNui(sold?: boolean) {
   const wrapper = document.querySelector('.wrapper') as HTMLElement;
   if (wrapper) wrapper.style.animation = 'slideOut 250ms forwards';
+  setTimeout(() => visible = false, 250);
 
   fetchNui('closeDrugsale', {
     sold: sold,

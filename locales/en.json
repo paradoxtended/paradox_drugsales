@@ -1,3 +1,6 @@
 {
-    
+    "sell_drugs": "Offer Drugs",
+    "offering_drugs": "Offering drugs...",
+    "no_drug": "You have no drugs with you.",
+    "nothing_to_offer": "You have nothin to offer in this part of the city."
 }

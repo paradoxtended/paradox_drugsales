@@ -4,7 +4,7 @@ lua54 'yes'
 game 'gta5'
 name 'prp-drugsales'
 author 'Paradoxtended'
-version '0.0.5'
+version '0.0.0'
 repository 'https://github.com/paradoxtended/prp-drugsales'
 description 'Advanced drug selling for FiveM'
 
@@ -31,11 +31,13 @@ client_scripts {
     'client/main.lua'
 }
 
-ui_page 'web//index.html'
+ui_page 'web/dist/index.html'
 
 files {
     'locales/*.json',
     'web/dist/index.html',
     'web/dist/assets/*.js',
-    'web/dist/assets/*.css'
+    'web/dist/assets/*.css',
+    'client/utils.lua',
+    'server/utils.lua',
 }
