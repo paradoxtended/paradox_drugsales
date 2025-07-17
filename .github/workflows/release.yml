@@ -77,7 +77,6 @@ jobs:
           cp ./{README.md,LICENSE,fxmanifest.lua,init.lua} ./temp/prp-drugsales
           cp -r ./{client,server,locales} ./temp/prp-drugsales
           cp -r ./web/dist ./temp/prp-drugsales/web/dist
-          cp ./web/LICENSE ./temp/prp-drugsales/web/dist
           cd ./temp && zip -r ../prp-drugsales.zip ./prp-drugsales
 
       - name: Create Release
