@@ -57,6 +57,7 @@ jobs:
           TGT_RELEASE_VERSION: ${{ github.ref_name }}
 
       - name: Push manifest change
+        if: github.ref_type == 'tag'
         uses: EndBug/add-and-commit@v8
         with:
           add: fxmanifest.lua
@@ -74,7 +75,7 @@ jobs:
         run: |
           mkdir -p ./temp/prp-drugsales
           mkdir -p ./temp/prp-drugsales/web
-          cp ./{README.md,LICENSE,fxmanifest.lua,init.lua} ./temp/prp-drugsales
+          cp ./{README.md,LICENSE,fxmanifest.lua,init.lua,config.lua} ./temp/prp-drugsales
           cp -r ./{client,server,locales} ./temp/prp-drugsales
           cp -r ./web/dist ./temp/prp-drugsales/web/dist
           cd ./temp && zip -r ../prp-drugsales.zip ./prp-drugsales
