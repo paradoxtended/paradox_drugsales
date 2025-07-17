@@ -1,69 +1,39 @@
-local labels = {}
+lib.locale()
 
-lib.callback('prp-drugsales:getItemLabels', false, function(data)
-    labels = data
-end)
+Utils = {}
 
-local utils = {}
+---@generic K, V
+---@param t table<K, V>
+---@return V, K
+function Utils.randomFromTable(t)
+    if type(t) ~= 'table' then
+        error("expected table, recieved: %s", type(t))
+    end
 
----@param coords vector3
----@param radius number
----@return CZone
-function utils.createSellingZone(coords, radius)
-    return lib.zones.sphere({
-        coords = coords,
-        radius = radius
-    })
+    local index = math.random(1, #t)
+    return t[index], index
 end
 
----@param coords vector3 | vector4
----@param data BlipData
----@return integer
-function utils.createBlip(coords, data)
-    local blip = AddBlipForCoord(coords.x, coords.y, coords.z)
-
-    SetBlipSprite(blip, data.sprite)
-    SetBlipColour(blip, data.color)
-    SetBlipScale(blip, data.scale)
-    SetBlipDisplay(blip, 4)
-    SetBlipAsShortRange(blip, true)
-
-    BeginTextCommandSetBlipName('STRING')
-    AddTextComponentSubstringPlayerName(data.name)
-    EndTextCommandSetBlipName(blip)
-
-    return blip
-end
-
----@param coords vector4 | vector3
----@param radius number
----@param color integer
----@return integer
-function utils.createRadiusBlip(coords, radius, color)
-    local blip = AddBlipForRadius(coords.x, coords.y, coords.z, radius)
-
-    SetBlipDisplay(blip, 4)
-    SetBlipScale(blip, radius)
-    SetBlipColour(blip, color)
-    SetBlipAsShortRange(blip, true)
-    SetBlipAlpha(blip, 150)
-
-    return blip
-end
-
+---Check if player has one of the defined jobs
+---@param jobs string | string[]
 ---@return boolean
-function utils.isAllowed()
-    for _, job in ipairs(Config.DisabledJobs) do
+function Utils.hasJob(jobs)
+    if type(jobs) == 'string' then
+        jobs = { jobs } ---@cast jobs string[]
+    end
+
+    for _, job in ipairs(jobs) do
         if job == Framework.getJob() then
-            return false
+            return true
         end
     end
 
-    return true
+    return false
 end
 
+---Check if player has any drugs with him
 ---@return boolean
-function utils.hasDrug()
+function Utils.hasDrug()
     for drug, _ in pairs(Config.Drugs) do
         if Framework.hasItem(drug) then
             return true
@@ -73,42 +43,50 @@ function utils.hasDrug()
     return false
 end
 
----@param zone? string
----@return string[]
-function utils.getZonesDrugs(zone)
-    local drugs = {}
+---Create normal blip for coords
+---@param coords vector3 | vector4
+---@param data BlipData
+---@return integer
+function Utils.createBlip(coords, data)
+    local blip = AddBlipForCoord(coords.x, coords.y, coords.z)
 
-    if not zone then
-        for drug, data in pairs(Config.Drugs) do
-            if not data.zones or #data.zones == 0 and Framework.hasItem(drug) then
-                table.insert(drugs, drug)
-            end
-        end
-    else
-        for drug, data in pairs(Config.Drugs) do
-            if data.zones then
-                for _, zoneName in ipairs(data.zones) do
-                    if zoneName == zone and Framework.hasItem(drug) then
-                        table.insert(drugs, drug)
-                    end
-                end
-            end
-        end
-    end
+    SetBlipSprite (blip, data.sprite)
+    SetBlipDisplay(blip, 4)
+    SetBlipScale(blip, data.scale)
+    SetBlipColour(blip, data.color)
+    SetBlipAsShortRange(blip, true)
 
-    return drugs
+    BeginTextCommandSetBlipName('STRING')
+    AddTextComponentSubstringPlayerName(data.name)
+    EndTextCommandSetBlipName(blip)
+
+    return blip
 end
+
+---Create radius blip for coords
+---@param coords vector3 | vector4
+---@param scale number
+---@param color integer
+---@return integer
+function Utils.createRadiusBlip(coords, scale, color)
+    local blip = AddBlipForRadius(coords.x, coords.y, coords.z, scale)
+
+    SetBlipDisplay(blip, 4)
+    SetBlipScale(blip, scale)
+    SetBlipColour(blip, color)
+    SetBlipAsShortRange(blip, true)
+    SetBlipAlpha(blip, 150)
+
+    return blip
+end
+
+local labels = {}
+
+lib.callback('prp-drugsales:getItemLabels', false, function(data)
+    labels = data
+end)
 
 ---@param name string
-function utils.getItemLabel(name)
+function Utils.getItemLabel(name)
     return labels[name] or labels[name:upper()] or 'ITEM_NOT_FOUND'
 end
-
----@param drugs string[]
----@return string
-function utils.getRandomDrug(drugs)
-    local index = math.random(1, #drugs)
-    return drugs[index]
-end
-
-return utils

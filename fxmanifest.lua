@@ -23,12 +23,14 @@ shared_scripts {
 server_scripts {
     '@oxmysql/lib/MySQL.lua',
     'init.lua',
-    'server/main.lua'
+    'server/utils.lua',
+    'server/*.lua'
 }
 
 client_scripts {
     'init.lua',
-    'client/main.lua'
+    'client/utils.lua',
+    'client/*.lua'
 }
 
 ui_page 'web/dist/index.html'
@@ -38,6 +40,4 @@ files {
     'web/dist/index.html',
     'web/dist/assets/*.js',
     'web/dist/assets/*.css',
-    'client/utils.lua',
-    'server/utils.lua',
 }

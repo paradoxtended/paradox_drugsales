@@ -16,7 +16,7 @@ Config.DefaultAcceptChance = 50.0
 ---@class Drug
 ---@field price { min: number, max: number };
 ---@field amount { min: number, max: number } | number;
----@field zones? string[]; If defined then you need to be in one of the specified zone to be able to sell the drug. Zones has to be created in Config.SellingZones
+---@field zones? string[]; If defined then you need to be in one of the specified zone to be able to sell the drug. Zone has to be created in Config.SellingZones
 
 ---@type table<string, Drug>
 Config.Drugs = {
@@ -38,6 +38,7 @@ Config.Drugs = {
 ---@field locations vector3[];
 ---@field radius? number;
 ---@field message? { enter: string, exit: string };
+---@field acceptChance? number;
 
 ---@type table<string, SellingZone>
 Config.SellingZones = {

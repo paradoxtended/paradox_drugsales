@@ -1,128 +1,134 @@
-lib.locale()
-
-local input
-
 ---@type { normal: integer, radius: integer }[], CZone[]
 local blips, zones = {}, {}
----@type { index: string, locationIndex: integer }?
-local currentZone
+---@type { index: string, locationIndex: integer }?, integer?
+local currentZone, currentNPC
 
-local utils = require 'client.utils'
+local function removeZones()
+    for _, blip in ipairs(blips) do
+        RemoveBlip(blip.normal)
+        RemoveBlip(blip.radius)
+    end
 
-for index, data in pairs(Config.SellingZones) do
-    local radius = data.radius or Config.DefaultRadius
+    for _, zone in ipairs(zones) do
+        zone:remove()
+    end
 
-    for locationIndex, coords in ipairs(data.locations) do
-        --- Create blips on resource start or player loaded
-        local normal = utils.createBlip(coords, data.blip)
-        local radiusBlip = utils.createRadiusBlip(coords, radius, data.blip.color)
+    table.wipe(blips)
+    table.wipe(zones)
+end
 
-        table.insert(blips, { normal = normal, radius = radiusBlip })
+local function createZones()
+    for index, data in pairs(Config.SellingZones) do
+        local radius = data.radius or Config.DefaultRadius
 
-        --- Create zones, lib zones on resource start or player loaded
-        local zone = utils.createSellingZone(coords, radius)
+        for locationIndex, coords in ipairs(data.locations) do
+            if data.blip then
+                local blip = Utils.createBlip(coords, data.blip)
+                local radiusBlip = Utils.createRadiusBlip(coords, radius, data.blip.color)
 
-        --- Zone functions
-        function zone:onEnter()
-            if currentZone?.index == index and currentZone?.locationIndex == locationIndex then return end
-
-            currentZone = { index = index, locationIndex = locationIndex }
-
-            if data.message then
-                Config.Notify(data.message.enter, 'inform')
+                table.insert(blips, { normal = blip, radius = radiusBlip })
             end
+
+            local zone = lib.zones.sphere({
+                coords = coords,
+                radius = radius,
+                onEnter = function()
+                    if currentZone?.index == index and currentZone?.locationIndex == locationIndex then return end
+
+                    currentZone = { index = index, locationIndex = locationIndex }
+
+                    if data.message then
+                        Config.Notify(data.message.enter, 'inform')
+                    end
+                end,
+                onExit = function()
+                    if currentZone?.index ~= index and currentZone?.locationIndex ~= locationIndex then return end
+
+                    currentZone = nil
+
+                    if data.message then
+                        Config.Notify(data.message.exit, 'inform')
+                    end
+                end
+            })
+
+            table.insert(zones, zone)
         end
-
-        function zone:onExit()
-            if currentZone?.index ~= index and currentZone?.locationIndex ~= locationIndex then return end
-
-            currentZone = nil
-
-            if data.message then
-                Config.Notify(data.message.exit, 'inform')
-            end
-        end
-
-        table.insert(zones, zone)
     end
 end
 
----@param price number
----@param drug string
----@param entity integer Ped
-local function sellDrug(price, drug, entity)
-    --- todo finish this function and implement chance system (higher offer, lower chance)
+createZones()
+
+local interval
+
+---@param reset boolean?
+local function pedBehaviour(reset)
+    if reset then
+        ClearPedTasks(cache.ped)
+        ClearPedTasks(currentNPC)
+
+        if interval then
+            ClearInterval(interval)
+            interval = nil
+        end
+
+        return
+    end
+
+    ClearPedTasks(currentNPC)
+    TaskTurnPedToFaceEntity(currentNPC, cache.ped, -1)
+    TaskTurnPedToFaceEntity(cache.ped, currentNPC, -1)
+    SetBlockingOfNonTemporaryEvents(currentNPC, true)
+
+    while not IsPedFacingPed(currentNPC, cache.ped, 15.0)
+    or not IsPedFacingPed(cache.ped, currentNPC, 15.0) do Wait(100) end
+
+    interval = SetInterval(function()
+        if not IsEntityPlayingAnim(currentNPC, 'missheist_jewelleadinout', 'jh_int_outro_loop_a', 3) and interval then
+            lib.playAnim(currentNPC, 'missheist_jewelleadinout', 'jh_int_outro_loop_a', 8.0, 8.0, -1, 16)
+        end
+    end, 10) --[[@as number?]]
 end
 
----@param drug string
-local function openDrugsale(drug)
-    if input then return end
-    input = promise.new()
+---@param zone string?
+---@return string[]
+local function getZoneDrugs(zone)
+    local drugs = {}
 
-    local data = Config.Drugs[drug]
+    for drugName, drug in pairs(Config.Drugs) do
+        if not zone and (not drug.zones or #drug.zones == 0) and Framework.hasItem(drugName) then
+            table.insert(drugs, drugName)
+        elseif zone and lib.table.contains(drug.zones, zone) and Framework.hasItem(drugName) then
+            table.insert(drugs, drugName)
+        end
+    end
 
-    local label = utils.getItemLabel(drug)
-    local amount = type(data.amount) == 'number' and data.amount or math.random(data.amount.min, data.amount.max)
-    local price = { min = data.price.min, max = data.price.max }
-
-    SetNuiFocus(true, true)
-    SendNUIMessage({
-        action = 'openDrugsale',
-        data = {
-            itemLabel = label,
-            amount = amount,
-            price = price
-        }
-    })
-
-    return Citizen.Await(input)
+    return drugs
 end
 
----@param entity nmber
-local function offerDrugs(entity)
-    local drugs = utils.getZonesDrugs(currentZone?.index)
+---@param npc integer
+function offerDrug(npc)
+    local drugs = getZoneDrugs(currentZone?.index)
 
     if not drugs or #drugs < 1 then
         return Config.Notify(locale('nothing_to_offer'), 'error')
     end
 
-    SetBlockingOfNonTemporaryEvents(entity, true)
-    TaskTurnPedToFaceEntity(entity, cache.ped, -1)
+    currentNPC = npc
+    pedBehaviour()
 
-    local success = Config.ProgressBar(locale('offering_drugs'), 5000, true, {
-        dict = 'special_ped@bill@monologue_4@monologue_4g', clip = 'bill_ig_1_b_01_imofferingironclad_6'
-    })
+    local progress = Config.ProgressBar(locale('offering_drugs'), 3500, true, { clip = 'bill_ig_1_b_01_imofferingironclad_6', dict = 'special_ped@bill@monologue_4@monologue_4g' })
 
-    if success then
-        local drug = utils.getRandomDrug(drugs)
-        local price = openDrugsale(drug)
+    if progress then
+        local drug = Utils.randomFromTable(drugs)
+        local price = waitForPrice(drug)
 
         if price then
-            sellDrug(drug, price, entity)
-        else
-            ClearPedTasks(entity)
+            --- todo: create sell drug function and implement accept chance...
         end
+        
+        pedBehaviour(true)
+    else
+        pedBehaviour(true)
     end
 end
-
-exports.ox_target:addGlobalPed({
-    label = locale('sell_drugs'),
-    icon = 'fa-solid fa-joint',
-    canInteract = function(_, distance)
-        return utils.isAllowed() and utils.hasDrug() and distance <= 2.0
-    end,
-    onSelect = function(data)
-        offerDrugs(data.entity)
-    end
-})
-
----@param data { sold: boolean, price: number }
-RegisterNUICallback('closeDrugsale', function(data, cb)
-    cb(1)
-    SetNuiFocus(false, false)
-
-    local promise = input
-    input = nil
-
-    promise:resolve(data.sold and data.price or nil)
-end)
