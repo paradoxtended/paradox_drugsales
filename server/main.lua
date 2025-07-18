@@ -44,6 +44,7 @@ lib.callback.register('prp-drugsales:sell', function(source, drugName, price, am
 
     local account = Config.DefaultAccount
     local baseChance = Config.DefaultAcceptChance
+    local dispatchChance = Config.DispatchData.Chance
 
     local currentZone = lib.callback.await('prp-drugsales:currentZone', source)
 
@@ -64,14 +65,23 @@ lib.callback.register('prp-drugsales:sell', function(source, drugName, price, am
 
         account = zone.account or account
         baseChance = zone.acceptChance or baseChance
+        dispatchChance = zone.dispatchChance or dispatchChance
     end
 
     -- Accept system
     local factor = price / drug.price.max
-    local acceptChance = baseChance - (factor * (baseChance / 2))
+    -- Feel free to edit these numbers if you know what your are doing, but I think this is the golden mean
+    local acceptChance = baseChance * (1.0 - (factor * 0.6))
 
-    if math.random(1, 100) > acceptChance then
+    if math.random(1, 100) < acceptChance then
         TriggerClientEvent('prp-drugsales:notify', source, locale('client_refused'), 'error')
+
+        -- Dispatch police
+        if math.random(1, 100) < dispatchChance then
+            TriggerClientEvent('prp-drugsales:notify', source, locale('dispatched'), 'inform')
+            Utils.dispatch(GetEntityCoords(GetPlayerPed(source)))
+        end
+
         return
     end
 

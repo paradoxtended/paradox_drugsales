@@ -6,5 +6,6 @@
     "client_refused": "Client refused to buy for this price.",
     "giving_offer": "Giving counter offer...",
     "handing_over_drugs": "Handing over drugs...",
-    "deal_success": "You successfully dealt with dealer."
+    "deal_success": "You successfully dealt with dealer.",
+    "dispatched": "You heard how client is calling police. You better run."
 }

@@ -1,5 +1,12 @@
 Config = {}
 
+---@class Dispatch
+---@field Message string
+---@field Sprite integer?
+---@field Code string
+---@field Title string
+---@field Chance number
+
 ---@alias AccountType
 ---| 'money'
 ---| 'black_money'
@@ -14,6 +21,15 @@ Config.DefaultAcceptChance = 90.0
 --- Default account, on this type of account you will get *payment*
 ---@type AccountType
 Config.DefaultAccount = 'money'
+--- Jobs that get dispatched when player will fail the deal
+Config.PoliceJobs = { 'police', 'sheriff' }
+---@type Dispatch
+Config.DispatchData = {
+    Chance = 50,
+    Code = '10-14',
+    Title = 'Suspicious drug activity',
+    Message = 'A person has been seen with some illegal stuff.'
+}
 
 ---@class BlipData
 ---@field name string
@@ -58,6 +74,7 @@ Config.Drugs = {
 ---@field message? { enter: string, exit: string }
 ---@field acceptChance? number
 ---@field account? AccountType
+---@field dispatchChance? number
 
 ---@type table<string, SellingZone>
 Config.SellingZones = {
