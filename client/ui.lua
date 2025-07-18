@@ -1,6 +1,7 @@
 local input
 
 ---@param drugName string
+---@return number?, number?
 function waitForPrice(drugName)
     if input then return end
     input = promise.new()
@@ -20,7 +21,7 @@ function waitForPrice(drugName)
         }
     })
 
-    return Citizen.Await(input)
+    return Citizen.Await(input), amount
 end
 
 ---@param data { sold: boolean, price: number }

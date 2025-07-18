@@ -24,3 +24,70 @@ lib.callback.register('prp-drugsales:getDrugAmount', function(source, drugName)
 
     return amount
 end)
+
+---@param source number
+---@param drugName string
+---@param price number
+---@param amount number
+lib.callback.register('prp-drugsales:sell', function(source, drugName, price, amount)
+    local player = Framework.getPlayerFromId(source)
+    local drug = Config.Drugs[drugName]
+
+    if not player
+    or not drug
+    or price > drug.price.max
+    or price < drug.price.min
+    or amount < drug.amount.min
+    or amount > drug.amount.max then
+        return
+    end
+
+    local account = Config.DefaultAccount
+    local baseChance = Config.DefaultAcceptChance
+
+    local currentZone = lib.callback.await('prp-drugsales:currentZone', source)
+
+    if currentZone then
+        -- Check if it's possible for the player to be in that zone
+        local zone = Config.SellingZones[currentZone.index]
+        local location = zone.locations[currentZone.locationIndex]
+        local radius = zone.radius or Config.DefaultRadius
+
+        if #(GetEntityCoords(GetPlayerPed(source)) - location.xyz) > radius then 
+            return
+        end
+
+        -- Check if drugName is allowed to be sold in that zone
+        if drug.zones and not lib.table.contains(drug.zones, currentZone.index) then
+            return
+        end
+
+        account = zone.account or account
+        baseChance = zone.acceptChance or baseChance
+    end
+
+    -- Accept system
+    local factor = price / drug.price.max
+    local acceptChance = baseChance - (factor * (baseChance / 2))
+
+    if math.random(1, 100) > acceptChance then
+        TriggerClientEvent('prp-drugsales:notify', source, locale('client_refused'), 'error')
+        return
+    end
+
+    local progress = lib.callback.await('prp-drugsales:animation', source, drugName)
+
+    if progress then
+        -- Check if player still has drugs
+        if player:getItemCount(drugName) < amount then return end
+
+        local finalPrice = price * amount
+
+        player:addAccountMoney(account, finalPrice)
+        player:removeItem(drugName, amount)
+
+        return true 
+    end
+
+    return false
+end)

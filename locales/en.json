@@ -2,5 +2,9 @@
     "sell_drugs": "Offer Drugs",
     "offering_drugs": "Offering drugs...",
     "no_drug": "You have no drugs with you.",
-    "nothing_to_offer": "You have nothing to offer in this part of the city."
+    "nothing_to_offer": "You have nothing to offer in this part of the city.",
+    "client_refused": "Client refused to buy for this price.",
+    "giving_offer": "Giving counter offer...",
+    "handing_over_drugs": "Handing over drugs...",
+    "deal_success": "You successfully dealt with dealer."
 }

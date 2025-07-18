@@ -1,7 +1,12 @@
+local busy
 ---@type { normal: integer, radius: integer }[], CZone[]
 local blips, zones = {}, {}
 ---@type { index: string, locationIndex: integer }?, integer?
 local currentZone, currentNPC
+
+lib.callback.register('prp-drugsales:currentZone', function()
+    return currentZone
+end)
 
 local function removeZones()
     for _, blip in ipairs(blips) do
@@ -106,6 +111,27 @@ local function getZoneDrugs(zone)
     return drugs
 end
 
+---@param drugName string
+---@param price number
+---@param amount number
+local function sellDrug(drugName, price, amount)
+    local drug = Config.Drugs[drugName]
+
+    if not drug then return end
+
+    local progress = Config.ProgressBar(locale('giving_offer'), 3500, true, { clip = 'youthinkyourhappy_7', dict = 'special_ped@jerome@monologue_6@monologue_6h' })
+
+    if progress then
+        local sold = lib.callback.await('prp-drugsales:sell', false, drugName, price, amount)
+
+        if sold then
+            Config.Notify(locale('deal_success'), 'success')
+        end
+    end
+
+    pedBehaviour(true)
+end
+
 ---@param npc integer
 function offerDrug(npc)
     local drugs = getZoneDrugs(currentZone?.index)
@@ -114,6 +140,9 @@ function offerDrug(npc)
         return Config.Notify(locale('nothing_to_offer'), 'error')
     end
 
+    if busy then return end
+
+    busy = true
     currentNPC = npc
     pedBehaviour()
 
@@ -121,14 +150,58 @@ function offerDrug(npc)
 
     if progress then
         local drug = Utils.randomFromTable(drugs)
-        local price = waitForPrice(drug)
+        local price, amount = waitForPrice(drug)
 
         if price then
-            --- todo: create sell drug function and implement accept chance...
+            sellDrug(drug, price, amount)
+        else
+            pedBehaviour(true)
         end
-        
-        pedBehaviour(true)
     else
         pedBehaviour(true)
+        currentNPC = nil
     end
+
+    busy = nil
 end
+
+local function createAnimation()
+    local model = `prop_anim_cash_pile_01`
+
+    lib.requestModel(model)
+
+    local coords = GetEntityCoords(cache.ped)
+    local object = CreateObject(model, coords.x, coords.y, coords.z, true, true, false)
+    local boneIndex = GetPedBoneIndex(currentNPC, 28422)
+
+    AttachEntityToEntity(object, currentNPC, boneIndex, 
+    0.06, 0.0, -0.02, 
+    0.0, 0.0, 0.0, 
+    true, true, false, true, 1, true)
+
+    lib.playAnim(currentNPC, 'mp_common', 'givetake1_b', 8.0, 8.0, 3000)
+    
+    SetTimeout(3000, function()
+        DeleteEntity(object)
+    end)
+
+    SetModelAsNoLongerNeeded(model)
+end
+
+---@param drugName string
+lib.callback.register('prp-drugsales:animation', function(drugName)
+    local prop = Config.Drugs[drugName]
+
+    pedBehaviour(true)
+    createAnimation()
+
+    local success = Config.ProgressBar(locale('handing_over_drugs'), 3000, true, {
+        clip = 'givetake1_a', dict = 'mp_common'
+    }, {
+        model = `prop_meth_bag_01`, bone = 28422,
+        pos = { x = -0.015, y = 0.015, z = 0.025 },
+        rot = { x = -90.0, y = 0.0, z = 0.0 }
+    })
+
+    return success
+end)

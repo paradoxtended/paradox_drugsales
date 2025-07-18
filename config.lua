@@ -1,11 +1,19 @@
 Config = {}
 
+---@alias AccountType
+---| 'money'
+---| 'black_money'
+---| 'bank'
+
 --- Default radius ... if radius is not defined in selling zone
 Config.DefaultRadius = 100.0
 --- Jobs that cannot offer drugs to NPCs
 Config.DisabledJobs = { 'police', 'sheriff', 'ambulance' }
 --- Default accept chance, used when player is not in zone or acceptChance is not specified in zone
-Config.DefaultAcceptChance = 50.0
+Config.DefaultAcceptChance = 90.0
+--- Default account, on this type of account you will get *payment*
+---@type AccountType
+Config.DefaultAccount = 'money'
 
 ---@class BlipData
 ---@field name string;
@@ -39,6 +47,7 @@ Config.Drugs = {
 ---@field radius? number;
 ---@field message? { enter: string, exit: string };
 ---@field acceptChance? number;
+---@field account? AccountType;
 
 ---@type table<string, SellingZone>
 Config.SellingZones = {
@@ -66,6 +75,8 @@ if not IsDuplicityVersion() then
             type = type
         })
     end
+
+    RegisterNetEvent('prp-drugsales:notify', Config.Notify)
 
     ---@param text string
     ---@param duration number
