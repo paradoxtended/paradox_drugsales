@@ -103,7 +103,7 @@ local function getZoneDrugs(zone)
     for drugName, drug in pairs(Config.Drugs) do
         if not zone and (not drug.zones or #drug.zones == 0) and Framework.hasItem(drugName) then
             table.insert(drugs, drugName)
-        elseif zone and lib.table.contains(drug.zones, zone) and Framework.hasItem(drugName) then
+        elseif zone and drug.zones and lib.table.contains(drug.zones, zone) and Framework.hasItem(drugName) then
             table.insert(drugs, drugName)
         end
     end

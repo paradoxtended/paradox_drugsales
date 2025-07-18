@@ -16,4 +16,4 @@ exports.ox_target:addGlobalPed({
 -- Every 30 minutes wipe cachedPeds so it won't effect performance...
 SetInterval(function()
     cachedPeds = {}
-end, 30000) --[[@as number?]]
+end, 30 * 60000) --[[@as number?]]
