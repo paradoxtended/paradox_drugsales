@@ -22,4 +22,5 @@ If you have any problem with the installation, don't worry to ask us for help on
 But before you ask for help, make sure you've followed the installation guide and installed all dependencies.
 ## Showcase
 <img width="500" height="500" alt="image" src="https://github.com/user-attachments/assets/aa9de464-e5c1-4857-aa18-28e968e3f754" />
-<img width="500" height="500" alt="image" src="https://github.com/user-attachments/assets/ac061b3e-3b74-461d-b55a-f25278ac5ba6" />
+<img width="500" height="500" alt="image" src="https://github.com/user-attachments/assets/cf18b5c1-0ff1-4b15-b7cd-65757e19983f" />
+
