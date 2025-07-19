@@ -93,6 +93,7 @@ lib.callback.register('prp-drugsales:sell', function(source, drugName, price, am
 
         local finalPrice = price * amount
 
+        Utils.logToDiscord(source, player, locale('webhook_sold', amount, Utils.getItemLabel(drugName), finalPrice, GetEntityCoords(GetPlayerPed(source))))
         player:addAccountMoney(account, finalPrice)
         player:removeItem(drugName, amount)
 

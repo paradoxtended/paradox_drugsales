@@ -7,5 +7,6 @@
     "giving_offer": "Giving counter offer...",
     "handing_over_drugs": "Handing over drugs...",
     "deal_success": "You successfully dealt with dealer.",
-    "dispatched": "You heard how client is calling police. You better run."
+    "dispatched": "You heard how client is calling police. You better run.",
+    "webhook_sold": "Sold %sx %s for %s. Sold at (coords): %s"
 }

@@ -7,6 +7,27 @@ function Utils.dispatch(coords)
     Dispatch.call(vector, Config.DispatchData, Config.PoliceJobs)
 end
 
+---@param source integer
+---@param xPlayer Player 
+---@param message string
+function Utils.logToDiscord(source, xPlayer, message)
+    if Config.Webhook == 'WEBHOOK_HERE' then return end
+
+    local connect = {
+        {
+            ["color"] = "16768885",
+            ["title"] = GetPlayerName(source) .. " (" .. xPlayer:getIdentifier() .. ")",
+            ["description"] = message,
+            ["footer"] = {
+                ["text"] = os.date('%H:%M - %d. %m. %Y', os.time()),
+                ["icon_url"] = 'https://i.postimg.cc/BnFQFgrd/PRP.png',
+            },
+        }
+    }
+    PerformHttpRequest(Config.Webhook, function(err, text, headers) end,
+        'POST', json.encode({ username = resourceName, embeds = connect }), { ['Content-Type'] = 'application/json' })
+end
+
 local labels, ready
 
 CreateThread(function()
@@ -31,3 +52,9 @@ lib.callback.register('prp-drugsales:getItemLabels', function()
 
     return labels
 end)
+
+---@param name string
+---@diagnostic disable-next-line: duplicate-set-field
+function Utils.getItemLabel(name)
+    return labels[name] or labels[name:upper()] or 'ITEM_NOT_FOUND'
+end

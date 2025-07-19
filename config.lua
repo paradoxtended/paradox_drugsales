@@ -30,6 +30,8 @@ Config.DispatchData = {
     Title = 'Suspicious drug activity',
     Message = 'A person has been seen with some illegal stuff.'
 }
+-- If you want to get log system then replace 'WEBHOOK_HERE' with your webhook key
+Config.Webhook = 'WEBHOOK_HERE'
 
 ---@class BlipData
 ---@field name string
