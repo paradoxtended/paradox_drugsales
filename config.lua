@@ -43,6 +43,7 @@ Config.Webhook = 'WEBHOOK_HERE'
 ---@field price { min: number, max: number }
 ---@field amount { min: number, max: number } | number
 ---@field zones? string[] If defined then you need to be in one of the specified zone to be able to sell the drug. Zone has to be created in Config.SellingZones
+---@field prop? string Custom prop
 
 ---@type table<string, Drug>
 Config.Drugs = {
@@ -77,6 +78,7 @@ Config.Drugs = {
 ---@field acceptChance? number
 ---@field account? AccountType
 ---@field dispatchChance? number
+---@field includeAll? boolean If set to true then it will be possible to sell drugs which haven't setted zone
 
 ---@type table<string, SellingZone>
 Config.SellingZones = {

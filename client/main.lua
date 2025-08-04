@@ -99,11 +99,12 @@ end
 ---@return string[]
 local function getZoneDrugs(zone)
     local drugs = {}
+    local allowAll = Config.SellingZones[zone]?.includeAll
 
     for drugName, drug in pairs(Config.Drugs) do
         if not zone and (not drug.zones or #drug.zones == 0) and Framework.hasItem(drugName) then
             table.insert(drugs, drugName)
-        elseif zone and drug.zones and lib.table.contains(drug.zones, zone) and Framework.hasItem(drugName) then
+        elseif zone and (drug.zones and lib.table.contains(drug.zones, zone) or allowAll) and Framework.hasItem(drugName) then
             table.insert(drugs, drugName)
         end
     end
@@ -174,14 +175,18 @@ local function createAnimation()
     local object = CreateObject(model, coords.x, coords.y, coords.z, true, true, false)
     local boneIndex = GetPedBoneIndex(currentNPC, 28422)
 
-    AttachEntityToEntity(object, currentNPC, boneIndex, 
-    0.06, 0.0, -0.02, 
-    0.0, 0.0, 0.0, 
-    true, true, false, true, 1, true)
+    AttachEntityToEntity(object, currentNPC, boneIndex, 0.07, 0.025, -0.02, 45.0, 45.0, 0.0, true, true, false, true, false, true)
 
     lib.playAnim(currentNPC, 'mp_common', 'givetake1_b', 8.0, 8.0, 3000)
     
-    SetTimeout(3000, function()
+    CreateThread(function()
+        local boneIndex = GetPedBoneIndex(cache.ped, 28422)
+
+        Wait(1500)
+        DetachEntity(object, true, false)
+        AttachEntityToEntity(object, cache.ped, boneIndex, 0.0, 0.0, 0.02, 45.0, 45.0, 0.0, true, true, false, true, false, true)
+
+        Wait(1500)
         DeleteEntity(object)
     end)
 
@@ -190,18 +195,36 @@ end
 
 ---@param drugName string
 lib.callback.register('prp-drugsales:animation', function(drugName)
-    local prop = Config.Drugs[drugName]
+    local model = Config.Drugs[drugName].prop or `prop_meth_bag_01`
+
+    lib.requestModel(model)
+
+    local coords = GetEntityCoords(cache.ped)
+    local object = CreateObject(model, coords.x, coords.y, coords.z, true, true, false)
+    local boneIndex = GetPedBoneIndex(cache.ped, 28422)
 
     pedBehaviour(true)
     createAnimation()
 
-    local success = Config.ProgressBar(locale('handing_over_drugs'), 3000, true, {
-        clip = 'givetake1_a', dict = 'mp_common'
-    }, {
-        model = `prop_meth_bag_01`, bone = 28422,
-        pos = { x = -0.015, y = 0.015, z = 0.025 },
-        rot = { x = -90.0, y = 0.0, z = 0.0 }
-    })
+    local pos = vec3(-0.015, 0.015, 0.025)
+    local rot = vec3(-90.0, 0.0, 0.0)
+
+    AttachEntityToEntity(object, cache.ped, boneIndex, pos.x, pos.y, pos.z, rot.x, rot.y, rot.z, true, true, false, true, false, true)
+
+    CreateThread(function()
+        local boneIndex = GetPedBoneIndex(currentNPC, 28422)
+
+        Wait(1500)
+        DetachEntity(object, true, false)
+        AttachEntityToEntity(object, currentNPC, boneIndex, 0.07, 0.02, -0.02, -50.0, 0.0, 0.0, true, true, false, true, false, true)
+
+        Wait(1500)
+        DeleteEntity(object)
+    end)
+
+    SetModelAsNoLongerNeeded(model)
+
+    local success = Config.ProgressBar(locale('handing_over_drugs'), 3000, true, { clip = 'givetake1_a', dict = 'mp_common' })
 
     return success
 end)

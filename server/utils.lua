@@ -3,7 +3,6 @@ Utils = {}
 ---@param coords vector3 | vector4
 function Utils.dispatch(coords)
     local vector = vector3(coords.x, coords.y, coords.z)
-    
     Dispatch.call(vector, Config.DispatchData, Config.PoliceJobs)
 end
 
