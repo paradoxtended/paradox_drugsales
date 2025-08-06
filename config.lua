@@ -12,6 +12,8 @@ Config = {}
 ---| 'black_money'
 ---| 'bank'
 
+---Default reputation ... if reputation is not defined in drug properties (0.01 rep will be added if deal ends successfully otherwise you'll lose 0.01)
+Config.DefaultRep = 0.01
 --- Default radius ... if radius is not defined in selling zone
 Config.DefaultRadius = 100.0
 --- Jobs that cannot offer drugs to NPCs
@@ -42,31 +44,21 @@ Config.Webhook = 'WEBHOOK_HERE'
 ---@class Drug
 ---@field price { min: number, max: number }
 ---@field amount { min: number, max: number } | number
+---@field rep? { add: number, remove: number } | number Reputation system (if deal ends successfully then your reputation will be higher otherwise you'll lose reputation)
 ---@field zones? string[] If defined then you need to be in one of the specified zone to be able to sell the drug. Zone has to be created in Config.SellingZones
 ---@field prop? string Custom prop
 
 ---@type table<string, Drug>
 Config.Drugs = {
     ['meth_bag'] = {
-        price = {
-            min = 125,
-            max = 180
-        },
-        amount = {
-            min = 1,
-            max = 5
-        },
+        price = { min = 125, max = 180 },
+        amount = { min = 1, max = 5 },
+        rep = { add = 0.02, remove = 0.01 },
         zones = { 'Forum Drive' }
     },
     ['coke_bag'] = {
-        price = {
-            min = 150,
-            max = 200
-        },
-        amount = {
-            min = 1,
-            max = 5
-        }
+        price = { min = 150, max = 200 },
+        amount = { min = 1, max = 5 }
     }
 }
 

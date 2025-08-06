@@ -17,6 +17,7 @@ function waitForPrice(drugName)
         data = {
             itemLabel = label,
             amount = amount,
+            rep = getPlayerRep(),
             price = price
         }
     })

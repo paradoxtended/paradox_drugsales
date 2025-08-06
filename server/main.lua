@@ -68,13 +68,24 @@ lib.callback.register('prp-drugsales:sell', function(source, drugName, price, am
         dispatchChance = zone.dispatchChance or dispatchChance
     end
 
+    -- Reputation
+    local reputation = {
+        add = drug.rep and (type(drug.rep) == 'number' and drug.rep or drug.rep.add) or Config.DefaultRep,
+        remove = drug.rep and (type(drug.rep) == 'number' and drug.rep or drug.rep.remove) or Config.DefaultRep,
+        current = getPlayerRep(player)
+    }
+
     -- Accept system
     local factor = price / drug.price.max
     -- Feel free to edit these numbers if you know what your are doing, but I think this is the golden mean
-    local acceptChance = baseChance * (1.0 - (factor * 0.6))
+    local base = baseChance * (1.0 - (factor * 0.6))
+    -- We need to adjust accept chance with reputation because if player has 100 reputation then he'll be able to sell forever without chance to fail
+    -- 10% is max to be addded to accept chance after clamp (0 - 10)
+    local acceptChance = base + math.max(0, math.min(reputation.current, 10))
 
     if math.random(1, 100) < acceptChance then
         TriggerClientEvent('prp-drugsales:notify', source, locale('client_refused'), 'error')
+        addPlayerRep(player, -reputation.remove)
 
         -- Dispatch police
         if math.random(1, 100) < dispatchChance then
@@ -93,6 +104,7 @@ lib.callback.register('prp-drugsales:sell', function(source, drugName, price, am
 
         local finalPrice = price * amount
 
+        addPlayerRep(player, reputation.add)
         Utils.logToDiscord(source, player, locale('webhook_sold', amount, Utils.getItemLabel(drugName), finalPrice, GetEntityCoords(GetPlayerPed(source))))
         player:addAccountMoney(account, finalPrice)
         player:removeItem(drugName, amount)
