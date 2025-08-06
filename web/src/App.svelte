@@ -26,7 +26,8 @@ $effect(() => {
 interface Drugsale {
   itemLabel: string;
   amount: number;
-  price: { min: number; max: number }
+  price: { min: number; max: number };
+  rep: number;
 }
 
 debugData<Drugsale>([
@@ -35,6 +36,7 @@ debugData<Drugsale>([
     data: {
       itemLabel: 'Meth',
       amount: 3,
+      rep: 5.42,
       price: {
         min: 116,
         max: 145
@@ -53,7 +55,8 @@ if (isEnvBrowser()) {
   const root = document.getElementById('app');
 
   // https://i.imgur.com/iPTAdYV.png - Night time img
-  root!.style.backgroundImage = 'url("https://i.imgur.com/3pzRj9n.png")';
+  // https://i.imgur.com/3pzRj9n.png - Day time img
+  root!.style.backgroundImage = 'url("https://i.imgur.com/iPTAdYV.png")';
   root!.style.backgroundSize = 'cover';
   root!.style.backgroundRepeat = 'no-repeat';
   root!.style.backgroundPosition = 'center';
@@ -61,7 +64,13 @@ if (isEnvBrowser()) {
 
 function closeNui(sold?: boolean) {
   const wrapper = document.querySelector('.wrapper') as HTMLElement;
-  if (wrapper) wrapper.style.animation = 'slideOut 250ms forwards';
+  const repWrapper = document.querySelector('.rep-wrapper') as HTMLElement;
+
+  if (wrapper && repWrapper) {
+    wrapper.style.animation = 'slideOut 250ms forwards';
+    repWrapper.style.animation = 'repAnimOut 250ms forwards';
+  }
+
   setTimeout(() => visible = false, 250);
 
   fetchNui('closeDrugsale', {
@@ -85,6 +94,13 @@ function onKeyDown(event: KeyboardEvent) {
 <svelte:window onkeydown={onKeyDown} />
 
 {#if visible}
+  <div class="rep-wrapper">
+    <p>YOUR REPUTATION:</p>
+    <div class="relative">
+      <div class="rep-shape"></div>
+      <p class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-sm">{Number(drug?.rep.toFixed(2)).toString()}</p>
+    </div>
+  </div>
   <div class="text-white w-[565px] absolute top-[80%] left-1/2 -translate-x-1/2 -translate-y-1/2 flex justify-center items-center flex-col gap-3 wrapper">
     <p class="text-lg">SELECT THE PRICE YOU WANT TO OFFER.</p>
     <p class="text-4xl text-center">CLIENT IS OFFERING TO PURCHASE {drug?.amount} {drug?.itemLabel.toUpperCase()}</p>

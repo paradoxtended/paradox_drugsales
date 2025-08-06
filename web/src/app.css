@@ -60,3 +60,36 @@ body {
   background: radial-gradient(#000000a0, #00000000 65%);
   animation: slideIn 250ms forwards;
 }
+
+@keyframes repAnimIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes repAnimOut {
+  100% {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+}
+
+.rep-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  position: absolute;
+  top: 3%; left: 2%;
+  color: #ffffff;
+  font-size: 17px;
+  animation: repAnimIn 250ms forwards;
+}
+
+.rep-wrapper .rep-shape {
+  width: 30px; height: 30px;
+  border: solid #84cc16 2px;
+  rotate: 45deg;
+  border-radius: 2px;
+  filter: drop-shadow(0 0 5px #84cc16);
+}
