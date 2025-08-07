@@ -4,7 +4,7 @@ lua54 'yes'
 game 'gta5'
 name 'prp-drugsales'
 author 'Paradoxtended'
-version '0.2.1'
+version '0.3.0'
 repository 'https://github.com/paradoxtended/prp-drugsales'
 description 'Advanced drug selling for FiveM'
 
