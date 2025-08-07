@@ -228,3 +228,63 @@ lib.callback.register('prp-drugsales:animation', function(drugName)
 
     return success
 end)
+
+local function attackPlayer()
+    Config.Notify(locale('client_attacked'), 'inform')
+
+    SetPedCombatAttributes(currentNPC, 46, true)
+    SetPedFleeAttributes(currentNPC, 0, false)
+    SetPedRelationshipGroupHash(currentNPC, GetHashKey('AGGRESSIVE'))
+    SetRelationshipBetweenGroups(5, GetHashKey('PLAYER'), GetHashKey('AGGRESSIVE'))
+    SetRelationshipBetweenGroups(5, GetHashKey('AGGRESSIVE'), GetHashKey('PLAYER'))
+    TaskCombatPed(currentNPC, cache.ped, 0, 16)
+    SetPedKeepTask(currentNPC, true)
+
+    currentNPC = nil
+end
+
+---@param drugName string
+---@param amount number
+local function robPlayer(drugName, amount)
+    Config.Notify(locale('client_stole'), 'inform')
+
+    TaskSmartFleePed(currentNPC, cache.ped, 50.0, -1, true, true)
+
+    local netId = NetworkGetNetworkIdFromEntity(currentNPC)
+    TriggerServerEvent('prp_drugsales:registerRobbery', netId, drugName, amount)
+
+    currentNPC = nil
+end
+
+RegisterNetEvent('prp_drugsales:attackPlayer', attackPlayer)
+RegisterNetEvent('prp_drugsales:robPlayer', robPlayer)
+
+RegisterNetEvent('prp_drugsales:robbedPlayer', function(netId)
+    exports.ox_target:addEntity(netId, {
+        label = locale('take_drugs'),
+        icon = 'fa-solid fa-hand',
+        name = 'prp_drugsales:robbedPlayer',
+        canInteract = function(entity, distance)
+            return IsEntityDead(entity)
+            and distance <= 2.0
+            and not prp.progressActive()
+        end,
+        onSelect = function()
+            if not Config.ProgressBar(locale('searching_drugs'), 5000, true, {
+                dict = 'missbigscore2aig_7@driver',
+                clip = 'boot_r_loop',
+                flag = 1
+            }) then return end
+
+            local success = lib.callback.await('prp_drugsales:takeDrugs', false, netId)
+
+            if success then
+                Config.Notify(locale('drugs_took'), 'inform')
+            end
+        end
+    })
+end)
+
+RegisterNetEvent('prp_drugsales:unregisterRobbery', function(netId)
+    exports.ox_target:removeEntity(netId, 'prp_drugsales:robbedPlayer')
+end)

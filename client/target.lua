@@ -5,7 +5,11 @@ exports.ox_target:addGlobalPed({
     label = locale('sell_drugs'),
     icon = 'fa-solid fa-joint',
     canInteract = function(entity, distance)
-        return distance <= 2.0 and not Utils.hasJob(Config.DisabledJobs) and Utils.hasDrug() and not cachedPeds[entity]
+        return distance <= 2.0 
+        and not Utils.hasJob(Config.DisabledJobs) 
+        and Utils.hasDrug() 
+        and not cachedPeds[entity]
+        and not IsEntityDead(entity)
     end,
     onSelect = function(data)
         cachedPeds[data.entity] = true

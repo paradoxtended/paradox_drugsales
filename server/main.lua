@@ -1,3 +1,6 @@
+---@type table<integer, { drug: string, amount: number }>
+local clients = {}
+
 ---@param source number
 ---@param drugName string
 lib.callback.register('prp-drugsales:getDrugAmount', function(source, drugName)
@@ -24,6 +27,71 @@ lib.callback.register('prp-drugsales:getDrugAmount', function(source, drugName)
 
     return amount
 end)
+
+---@param netId number
+---@param drugName string
+---@param amount number
+RegisterNetEvent('prp_drugsales:registerRobbery', function(netId, drugName, amount)
+    local entity = NetworkGetEntityFromNetworkId(netId)
+
+    if not entity then return end
+
+    clients[netId] = {
+        drug = drugName,
+        amount = amount
+    }
+
+    TriggerClientEvent('prp_drugsales:robbedPlayer', -1, netId)
+end)
+
+---@param source number
+---@param netId number
+lib.callback.register('prp_drugsales:takeDrugs', function(source, netId)
+    local player = Framework.getPlayerFromId(source)
+
+    if not player then return end
+
+    local client = clients[netId]
+
+    -- If there is not client with netId then it's sure that this event has been triggered with executor (cheater executed it),
+    -- or there is an option that players want to "fake it" by looting the same ped at the same time
+    -- you can do whatever you want here (kick or ban player, it's up to you)
+    if not client then
+        -- YOUR CODE HERE
+        return
+    end
+
+    clients[netId] = nil
+
+    player:addItem(client.drug, client.amount)
+
+    TriggerClientEvent('prp_drugsales:unregisterRobbery', -1, netId)
+
+    return true
+end)
+
+---@param player Player
+---@param drugName string
+---@param amount number
+local function refuseDeal(player, drugName, amount)
+    TriggerClientEvent('prp-drugsales:notify', source, locale('client_refused'), 'error')
+    
+    local random = math.random(100)
+
+    -- Client refuse and walk away
+    if random < 33 then return end
+
+    -- Client refuse and attack player
+    if random > 33 and random < 66 then
+        return TriggerClientEvent('prp_drugsales:attackPlayer', player.source)
+    end
+
+    -- Client refuse to pay and steal drug from player
+    if random > 66 then
+        player:removeItem(drugName, amount)
+        return TriggerClientEvent('prp_drugsales:robPlayer', player.source, drugName, amount)
+    end
+end
 
 ---@param source number
 ---@param drugName string
@@ -83,9 +151,9 @@ lib.callback.register('prp-drugsales:sell', function(source, drugName, price, am
     -- 10% is max to be addded to accept chance after clamp (0 - 10)
     local acceptChance = base + math.max(0, math.min(reputation.current, 10))
 
-    if math.random(1, 100) < acceptChance then
-        TriggerClientEvent('prp-drugsales:notify', source, locale('client_refused'), 'error')
+    if math.random(1, 100) > acceptChance then
         addPlayerRep(player, -reputation.remove)
+        refuseDeal(player, drugName, amount)
 
         -- Dispatch police
         if math.random(1, 100) < dispatchChance then

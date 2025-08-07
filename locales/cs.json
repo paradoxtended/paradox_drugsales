@@ -1,0 +1,17 @@
+{
+    "sell_drugs": "Nabídnout drogy",
+    "offering_drugs": "Nabízíš drogy...",
+    "no_drug": "Nemáš u sebe žádné drogy.",
+    "nothing_to_offer": "V této části města nemáš co nabídnout.",
+    "client_refused": "Zákazník odmítl koupit za tuto cenu.",
+    "client_attacked": "Zákazník na tebe útočí. Braň se.",
+    "client_stole": "Zákazník ti ukradl drogy. Zabij ho a získej je zpět.",
+    "giving_offer": "Dáváš protinabídku...",
+    "handing_over_drugs": "Předáváš drogy...",
+    "deal_success": "Úspěšně jsi uzavřel obchod s dealerem.",
+    "dispatched": "Slyšíš, jak zákazník volá policii. Radši uteč.",
+    "take_drugs": "Vzít drogy",
+    "searching_drugs": "Hledáš drogy...",
+    "drugs_took": "Úspěšně jsi vzal drogy.",
+    "webhook_sold": "Prodáno %sx %s za %s. Prodáno na souřadnicích: %s"
+}

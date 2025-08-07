@@ -4,9 +4,14 @@
     "no_drug": "You have no drugs with you.",
     "nothing_to_offer": "You have nothing to offer in this part of the city.",
     "client_refused": "Client refused to buy for this price.",
+    "client_attacked": "Client is attacking you. Defense yourself.",
+    "client_stole": "Client stole your drugs. Kill him to get your drugs back.",
     "giving_offer": "Giving counter offer...",
     "handing_over_drugs": "Handing over drugs...",
     "deal_success": "You successfully dealt with dealer.",
     "dispatched": "You heard how client is calling police. You better run.",
+    "take_drugs": "Take Drugs",
+    "searching_drugs": "Searching for drugs...",
+    "drugs_took": "You have successfully took drugs.",
     "webhook_sold": "Sold %sx %s for %s. Sold at (coords): %s"
 }

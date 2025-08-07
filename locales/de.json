@@ -1,0 +1,17 @@
+{
+    "sell_drugs": "Drogen anbieten",
+    "offering_drugs": "Du bietest Drogen an...",
+    "no_drug": "Du hast keine Drogen bei dir.",
+    "nothing_to_offer": "Du hast in diesem Stadtteil nichts anzubieten.",
+    "client_refused": "Der Kunde hat den Preis abgelehnt.",
+    "client_attacked": "Der Kunde greift dich an. Verteidige dich.",
+    "client_stole": "Der Kunde hat dir die Drogen gestohlen. Töte ihn, um sie zurückzubekommen.",
+    "giving_offer": "Gegenangebot wird gemacht...",
+    "handing_over_drugs": "Drogen werden übergeben...",
+    "deal_success": "Du hast erfolgreich mit dem Dealer gehandelt.",
+    "dispatched": "Du hörst, wie der Kunde die Polizei ruft. Lauf lieber weg.",
+    "take_drugs": "Drogen nehmen",
+    "searching_drugs": "Suche nach Drogen...",
+    "drugs_took": "Du hast erfolgreich Drogen genommen.",
+    "webhook_sold": "%sx %s für %s verkauft. Verkauft an (Koordinaten): %s"
+}
