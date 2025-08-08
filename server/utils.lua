@@ -1,5 +1,18 @@
 Utils = {}
 
+---@generic K, V
+---@param t table<K, V>
+---@return V, K
+---@diagnostic disable-next-line: duplicate-set-field
+function Utils.randomFromTable(t)
+    if type(t) ~= 'table' then
+        error("expected table, recieved: %s", type(t))
+    end
+
+    local index = math.random(1, #t)
+    return t[index], index
+end
+
 ---@param coords vector3 | vector4
 function Utils.dispatch(coords)
     local vector = vector3(coords.x, coords.y, coords.z)

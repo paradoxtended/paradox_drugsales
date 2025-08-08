@@ -87,6 +87,44 @@ Config.SellingZones = {
     }
 }
 
+---@class ZoneData
+---@field blip? BlipData
+---@field locations vector3[]
+---@field message? { enter: string, exit: string }
+---@field radius? number
+---@field drugs table<string, { amount: { min: number, max: number }, pricePerBag: { min: number, max: number } }>
+---@field waitTime { min: number, max: number } In seconds
+
+---@class WholesaleData
+---@field disabled? boolean
+---@field zones ZoneData[]
+
+---@type WholesaleData
+Config.Wholesale = {
+    zones = {
+        {
+            blip = {
+                name = 'Groove Street (Bulk sales)',
+                sprite = 51,
+                scale = 0.8,
+                color = 81
+            },
+            radius = 10.0,
+            waitTime = { min = 5, max = 7 },
+            message = { enter = 'Hey', exit = 'Bye' },
+            locations = {
+                vector3(-54.9970, -1836.4900, 26.5768)
+            },
+            drugs = {
+                meth_bag = {
+                    amount = { min = 30, max = 65 },
+                    pricePerBag = { min = 70, max = 110 }
+                }
+            }
+        }
+    }
+}
+
 --- Editable codes
 if not IsDuplicityVersion() then
     ---If you want to change your notification script, feel free to do so, but function params must be the same!!

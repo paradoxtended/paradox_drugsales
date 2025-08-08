@@ -13,5 +13,6 @@
     "take_drugs": "Take Drugs",
     "searching_drugs": "Searching for drugs...",
     "drugs_took": "You have successfully took drugs.",
+    "no_drugs_to_sell": "You don't have enough drugs to sell in this zone.",
     "webhook_sold": "Sold %sx %s for %s. Sold at (coords): %s"
 }
