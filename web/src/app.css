@@ -86,7 +86,7 @@ body {
   animation: repAnimIn 250ms forwards;
 }
 
-.rep-wrapper .rep-shape {
+.rep-shape {
   width: 30px; height: 30px;
   border: solid #84cc16 2px;
   rotate: 45deg;

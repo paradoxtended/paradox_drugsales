@@ -1,5 +1,11 @@
 if Config.Wholesale.disabled then return end
 
+lib.addCommand(Config.Wholesale.command, {
+    help = locale('sell_command_help')
+}, function(source)
+    TriggerClientEvent('prp_drugsales:callDealers', source)
+end)
+
 lib.callback.register('prp_drugsales:checkWholesale', function(source)
     local player = Framework.getPlayerFromId(source)
 

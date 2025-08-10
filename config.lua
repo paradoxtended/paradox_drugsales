@@ -97,21 +97,22 @@ Config.SellingZones = {
 
 ---@class WholesaleData
 ---@field disabled? boolean
+---@field command string
 ---@field zones ZoneData[]
 
 ---@type WholesaleData
 Config.Wholesale = {
+    command = 'selldrugs',
     zones = {
         {
             blip = {
                 name = 'Groove Street (Bulk sales)',
                 sprite = 51,
-                scale = 0.8,
+                scale = 0.75,
                 color = 81
             },
             radius = 10.0,
             waitTime = { min = 5, max = 7 },
-            message = { enter = 'Hey', exit = 'Bye' },
             locations = {
                 vector3(-54.9970, -1836.4900, 26.5768)
             },

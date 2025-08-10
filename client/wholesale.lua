@@ -5,7 +5,8 @@ local blips, zones = {}, {}
 ---@type { index: integer, locationIndex: integer }?
 local currentZone
 
-local function createClient()
+---@param data { drugName: string, amount: number, price: number }
+local function createClient(data)
     ---@todo spawn a ped in radius and make him to come to player
 end
 
@@ -45,22 +46,39 @@ local function waitForClient(zone)
     return success
 end
 
-local function enterZone()
+local function callDealers()
     local zone = Config.Wholesale.zones[currentZone.index]
     
     -- Check if player has one of the drugs from zone.drugs
     local drugName, amount = lib.callback.await('prp_drugsales:checkWholesale', false)
 
     if drugName and amount then
+        prp.showObjective(locale('wait_for_client'), locale('waiting_content'))
+
         local success = waitForClient(zone)
+
+        prp.hideObjective()
         
         if success then
-            createClient()
+            local pricePerBag = math.random(zone.drugs[drugName].pricePerBag.min, zone.drugs[drugName].pricePerBag.max)
+            local accepted = waitForDecision(drugName, amount, pricePerBag)
+            
+            -- If player disagree with deal we return this function so it will keep waiting for player to accept
+            if not accepted then return callDealers() end
+
+            local data = { drugName = drugName, amount = amount, price = pricePerBag }
+            createClient(data)
         end
     else
         Config.Notify(locale('no_drugs_to_sell'), 'error')
     end
 end
+
+RegisterNetEvent('prp_drugsales:callDealers', function()
+    if not currentZone then return end
+
+    callDealers()
+end)
 
 for index, data in ipairs(Config.Wholesale.zones) do
     for locationIndex, coords in ipairs(data.locations) do
@@ -71,10 +89,6 @@ for index, data in ipairs(Config.Wholesale.zones) do
                 if currentZone?.index == index and currentZone?.locationIndex == locationIndex then return end
 
                 currentZone = { index = index, locationIndex = locationIndex }
-                
-                CreateThread(function()
-                    enterZone()
-                end)
 
                 if data.message then
                     Config.Notify(data.message.enter, 'inform')

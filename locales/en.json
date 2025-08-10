@@ -13,6 +13,9 @@
     "take_drugs": "Take Drugs",
     "searching_drugs": "Searching for drugs...",
     "drugs_took": "You have successfully took drugs.",
+    "sell_command_help": "Sell drugs to NPCs (bulk sale).",
     "no_drugs_to_sell": "You don't have enough drugs to sell in this zone.",
+    "wait_for_client": "Wait for client",
+    "waiting_content": "Wait for client offers. The offer will arrive soon.",
     "webhook_sold": "Sold %sx %s for %s. Sold at (coords): %s"
 }
