@@ -40,6 +40,20 @@ function Utils.logToDiscord(source, xPlayer, message)
         'POST', json.encode({ username = resourceName, embeds = connect }), { ['Content-Type'] = 'application/json' })
 end
 
+---Check if player has any drugs with him
+---@param player Player
+---@return boolean
+---@diagnostic disable-next-line: duplicate-set-field
+function Utils.hasDrug(player)
+    for drug, _ in pairs(Config.Drugs) do
+        if player:hasItem(drug) then
+            return true
+        end
+    end
+
+    return false
+end
+
 local labels, ready
 
 CreateThread(function()

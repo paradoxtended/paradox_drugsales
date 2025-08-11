@@ -11,9 +11,18 @@ interface Drugsale {
   rep: number;
 }
 
+type Hustle = {
+  label: string;
+  price: number;
+  amount: number;
+}[];
+
 let drug: Drugsale | undefined = $state();
+let hustle: Hustle | undefined = $state();
+
 let visible: boolean = $state(false); // Main (classic) offering system
-let bulkVisible: boolean = $state(false);
+let hustleVisible: boolean = $state(false);
+
 let selectedPrice: number = $state(0);
 
 let hideMin = $state(false);
@@ -48,14 +57,15 @@ debugData<Drugsale>([
 ])
 */
 
-debugData([
+debugData<Hustle>([
   {
-    action: 'openBulkSale',
-    data: {
-      itemLabel: 'Coke',
-      amount: 52,
-      price: 75
-    }
+    action: 'hustle',
+    data: [
+        { label: 'Rolex', price: 21, amount: 4 },
+        { label: 'Gold Coins', price: 20, amount: 5 },
+        { label: 'Camera', price: 26, amount: 4 },
+        { label: 'Meth Bag', price: 75, amount: 24 }
+      ]
   }
 ])
 
@@ -65,9 +75,9 @@ useNuiEvent('openDrugsale', (data: Drugsale) => {
   visible = true;
 })
 
-useNuiEvent('openBulkSale', (data: Drugsale) => {
-  drug = data;
-  bulkVisible = true;
+useNuiEvent('hustle', (data: Hustle) => {
+  hustle = data;
+  hustleVisible = true;
 })
 
 if (isEnvBrowser()) {
@@ -81,7 +91,7 @@ if (isEnvBrowser()) {
   root!.style.backgroundPosition = 'center';
 }
 
-function closeNui(sold?: boolean, price?: number) {
+function closeNui(sold?: boolean) {
   const wrapper = document.querySelector('.wrapper') as HTMLElement;
   const repWrapper = document.querySelector('.rep-wrapper') as HTMLElement;
 
@@ -90,13 +100,25 @@ function closeNui(sold?: boolean, price?: number) {
 
   setTimeout(() => {
     visible = false;
-    bulkVisible = false;
+    hustleVisible = false;
   }, 250);
 
   fetchNui('closeDrugsale', {
     sold: sold,
-    price: price || selectedPrice
+    price: selectedPrice
   })
+}
+
+function closeHustle(result: 'confirmed' | 'negotiate' | false) {
+  const container = document.querySelector('.hustle-container') as HTMLElement;
+
+  if (container === null) return;
+
+  container.style.animation = 'fadeOut 300ms forwards';
+
+  setTimeout(() => hustleVisible = false, 300);
+
+  fetchNui('hustle', result);
 }
 
 function onKeyDown(event: KeyboardEvent) {
@@ -104,11 +126,9 @@ function onKeyDown(event: KeyboardEvent) {
 
   switch (key) {
     case 'escape':
-      return closeNui();
+      return visible && closeNui();
     case 'e':
-      return visible ? closeNui(true) : closeNui(true, (drug?.price as unknown as number));
-    case 'q':
-      return bulkVisible && closeNui();
+      return visible && closeNui(true);
   }
 }
 </script>
@@ -155,25 +175,40 @@ function onKeyDown(event: KeyboardEvent) {
   </div>
 {/if}
 
-{#if bulkVisible}
-  <div class="text-white w-[565px] absolute top-[80%] left-1/2 -translate-x-1/2 -translate-y-1/2 flex justify-center items-center flex-col gap-3 wrapper">
-    <p class="text-lg">DECIDE WHETHER YOU AGREE TO THE DEAL.</p>
-    <p class="text-4xl text-center">CLIENT IS OFFERING TO PURCHASE {drug?.amount} {drug?.itemLabel.toUpperCase()}</p>
-    <p class="text-2xl">
-      CLIENT IS OFFERING
-      <span class="text-lime-500 drop-shadow-[0_0_10px_#84cc16]">
-        ${Number((drug?.price as unknown as number).toFixed(2)).toLocaleString('en-US')}
-      </span>
-      PER BAG
-    </p>
-    <div class="flex items-center gap-3 w-3/4">
-      <div class="flex justify-center py-2 items-center gap-3 w-full bg-red-500/20 border border-red-800 rounded-md">
-        <p class="bg-black/50 px-2">Q</p>
-        <p>DISAGREE</p>
-      </div>
-      <div class="flex justify-center py-2 items-center gap-3 w-full bg-lime-500/20 border border-lime-800 rounded-md">
-        <p class="bg-black/50 px-2">E</p>
-        <p>AGREE</p>
+{#if hustleVisible && hustle}
+  <div class="hustle-container">
+    <div class="text-white w-[565px] absolute top-[80%] left-1/2 -translate-x-1/2 -translate-y-1/2 flex justify-center items-center flex-col gap-3">
+      <p class="text-lg text-lime-500">OFFER</p>
+      <p class="text-4xl text-center">
+        {hustle.reduce((sum, item) => sum + (item.price * item.amount), 0).toFixed(0)} BILLS FOR
+        {hustle.reduce((sum, item) => sum + item.amount, 0).toFixed(0)} ITEMS
+      </p>
+      <p class="text-neutral-400 font-[Inter] text-sm text-center">
+        {#each hustle as item, i}
+          <span style="white-space: nowrap;">
+            {item.amount}x {item.label} for {item.price * item.amount} bills
+          </span>{i < hustle.length - 1 ? ', ' : ''}
+        {/each}
+      </p>
+    </div>
+
+    <div class="absolute w-[65%] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-between text-white">
+      <button class="bg-black/50 w-[300px] text-start text-lg px-7 py-3 rounded-lg border border-neutral-600 hover:bg-black/30 transition-all duration-300"
+      onclick={() => closeHustle(false)}>
+        DECLINE OFFER
+      </button>
+
+      <div class="flex flex-col gap-3">
+        <button class="bg-black/50 w-[300px] text-start text-lg px-7 py-3 rounded-lg border border-neutral-600 hover:bg-black/30 transition-all duration-300"
+        onclick={() => closeHustle('confirmed')}>
+          ACCEPT OFFER
+        </button>
+
+        <button class="bg-black/50 w-[300px] text-start text-lg px-7 py-3 rounded-lg border border-neutral-600 hover:bg-black/30 transition-all duration-300"
+        onclick={() => closeHustle('negotiate')}>
+          NEGOTIATE
+          <p class="text-neutral-400 font-[Inter] text-sm">Renegotiate the prices.</p>
+        </button>
       </div>
     </div>
   </div>

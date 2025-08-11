@@ -2,6 +2,7 @@
     "sell_drugs": "Offer Drugs",
     "offering_drugs": "Offering drugs...",
     "no_drug": "You have no drugs with you.",
+    "is_cop": "You are a law enforcement.",
     "nothing_to_offer": "You have nothing to offer in this part of the city.",
     "client_refused": "Client refused to buy for this price.",
     "client_attacked": "Client is attacking you. Defense yourself.",
@@ -13,9 +14,22 @@
     "take_drugs": "Take Drugs",
     "searching_drugs": "Searching for drugs...",
     "drugs_took": "You have successfully took drugs.",
-    "sell_command_help": "Sell drugs to NPCs (bulk sale).",
-    "no_drugs_to_sell": "You don't have enough drugs to sell in this zone.",
-    "wait_for_client": "Wait for client",
-    "waiting_content": "Wait for client offers. The offer will arrive soon.",
-    "webhook_sold": "Sold %sx %s for %s. Sold at (coords): %s"
+    "webhook_sold": "Sold %sx %s for %s. Sold at (coords): %s",
+    "hustle": {
+        "hustling": "Hustling",
+        "command": "To start hustling you need to have drugs with you.",
+        "searching_client": "Searching for client...",
+        "failed_to_find_client": "You failed to find a client.",
+        "delay_message": "You need to wait %s to start another hustle.",
+        "no_client_available": "Every client is hustling right now, you just have to wait a while.",
+        "go_to_client": "Go to the zone marked on your GPS and locate the client.",
+        "introduce_yourself": "Introduce yourself",
+        "introducing_yourself": "Introducing yourself...",
+        "no_vehicle": "You cannot hustle without vehicle.",
+        "offer_drugs": "Offer your drugs to client. Your drugs are in the trunk.",
+        "nothing_to_offer": "You have nothing to offer.",
+        "customer_browsing_drugs": "Customer is browsing the drugs...",
+        "renegotiating_deal": "Renegotiating the deal...",
+        "client_refused": "The client refused to negotiate so many times."
+    }
 }

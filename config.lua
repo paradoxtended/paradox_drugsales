@@ -47,6 +47,7 @@ Config.Webhook = 'WEBHOOK_HERE'
 ---@field rep? { add: number, remove: number } | number Reputation system (if deal ends successfully then your reputation will be higher otherwise you'll lose reputation)
 ---@field zones? string[] If defined then you need to be in one of the specified zone to be able to sell the drug. Zone has to be created in Config.SellingZones
 ---@field prop? string Custom prop
+---@field disableHustle? boolean
 
 ---@type table<string, Drug>
 Config.Drugs = {
@@ -87,42 +88,36 @@ Config.SellingZones = {
     }
 }
 
----@class ZoneData
----@field blip? BlipData
----@field locations vector3[]
----@field message? { enter: string, exit: string }
----@field radius? number
----@field drugs table<string, { amount: { min: number, max: number }, pricePerBag: { min: number, max: number } }>
----@field waitTime { min: number, max: number } In seconds
+---@class HustleClient
+---@field models string | string[]
+---@field locations vector4[]
+---@field fail? number Percent to fail to find a client
 
----@class WholesaleData
+---@class HustleData
+---@field amount number Max amount to sell (amount will be random between player's amount and this value)
+---@field divider number Price will be multiplied by this value, you want to set it lower than 1.0 because this is much faster than normal selling and you don't want this to be much op
+---@field attempts? number Default is set to 3
+
+---@class Hustling
 ---@field disabled? boolean
 ---@field command string
----@field zones ZoneData[]
+---@field clients HustleClient
+---@field delay? number In minutes (default delay is 10 minutes)
+---@field hustling HustleData
 
----@type WholesaleData
-Config.Wholesale = {
-    command = 'selldrugs',
-    zones = {
-        {
-            blip = {
-                name = 'Groove Street (Bulk sales)',
-                sprite = 51,
-                scale = 0.75,
-                color = 81
-            },
-            radius = 10.0,
-            waitTime = { min = 5, max = 7 },
-            locations = {
-                vector3(-54.9970, -1836.4900, 26.5768)
-            },
-            drugs = {
-                meth_bag = {
-                    amount = { min = 30, max = 65 },
-                    pricePerBag = { min = 70, max = 110 }
-                }
-            }
-        }
+---@type Hustling
+Config.Hustling = {
+    command = 'hustledrugs',
+    clients = {
+        models = { `g_m_importexport_01`, `g_m_m_mexboss_01`, `g_m_m_armboss_01`, `g_m_y_ballaorig_01` },
+        locations = {
+            vector4(-61.5496, -1844.5692, 26.5942, 325.3091)
+        },
+        fail = 15
+    },
+    hustling = {
+        amount = 50,
+        divider = 0.5
     }
 }
 
@@ -145,7 +140,8 @@ if not IsDuplicityVersion() then
     ---@param canCancel? boolean
     ---@param anim? any
     ---@param prop? any
-    Config.ProgressBar = function(text, duration, canCancel, anim, prop)
+    ---@param enable? boolean
+    Config.ProgressBar = function(text, duration, canCancel, anim, prop, enable)
         return prp.progressBar({
             duration = duration,
             label = text,
@@ -153,8 +149,8 @@ if not IsDuplicityVersion() then
             canCancel = canCancel,
             disable = {
                 car = true,
-                move = true,
-                combat = true
+                move = not enable,
+                combat = not enable
             },
             anim = anim,
             prop = prop

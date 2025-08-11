@@ -4,6 +4,7 @@ local cachedPeds = {}
 exports.ox_target:addGlobalPed({
     label = locale('sell_drugs'),
     icon = 'fa-solid fa-joint',
+    name = 'prp_drugsales:main_interaction',
     canInteract = function(entity, distance)
         return distance <= 2.0 
         and not Utils.hasJob(Config.DisabledJobs) 
