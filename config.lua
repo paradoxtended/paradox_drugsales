@@ -93,17 +93,10 @@ Config.SellingZones = {
 ---@field locations vector4[]
 ---@field fail? number Percent to fail to find a client
 
----@class HustleData
----@field amount number Max amount to sell (amount will be random between player's amount and this value)
----@field divider number Price will be multiplied by this value, you want to set it lower than 1.0 because this is much faster than normal selling and you don't want this to be much op
----@field attempts? number Default is set to 3
-
 ---@class Hustling
 ---@field disabled? boolean
 ---@field command string
 ---@field clients HustleClient
----@field delay? number In minutes (default delay is 10 minutes)
----@field hustling HustleData
 
 ---@type Hustling
 Config.Hustling = {
@@ -115,10 +108,6 @@ Config.Hustling = {
         },
         fail = 15
     },
-    hustling = {
-        amount = 50,
-        divider = 0.5
-    }
 }
 
 --- Editable codes
