@@ -10,7 +10,7 @@ exports.ox_target:addGlobalPed({
         and Utils.hasDrug() 
         and not cachedPeds[entity]
         and not IsEntityDead(entity)
-        and not isHustling()
+        and not prp.progressActive()
     end,
     onSelect = function(data)
         cachedPeds[data.entity] = true

@@ -15,17 +15,6 @@
     "searching_drugs": "Searching for drugs...",
     "drugs_took": "You have successfully took drugs.",
     "webhook_sold": "Sold %sx %s for %s. Sold at (coords): %s",
-    "hustle": {
-        "command": "Start hustling drugs.",
-        "delay_message": "You need to wait %s to start hustling again.",
-        "no_client_available": "There is currently no client available to hustle.",
-        "searching_clients": "Searching for client...",
-        "failed_find_client": "You failed to find a client to hustle.",
-        "introduce_yourself": "Introduce yourself",
-        "introducing_yourself": "Introducing yourself...",
-        "no_drugs_vehicle": "There are no drugs in this vehicle's trunk.",
-        "browsing_drugs": "The client is browsing drugs...",
-        "renegotiating": "Renegotiating the deal...",
-        "finished": "You successfully finished the hustling."
-    }
+    "searching_client": "Posting announcement...",
+    "not_in_zone": "You are not in zone for wholesale."
 }

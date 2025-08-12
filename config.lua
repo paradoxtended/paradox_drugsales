@@ -47,7 +47,6 @@ Config.Webhook = 'WEBHOOK_HERE'
 ---@field rep? { add: number, remove: number } | number Reputation system (if deal ends successfully then your reputation will be higher otherwise you'll lose reputation)
 ---@field zones? string[] If defined then you need to be in one of the specified zone to be able to sell the drug. Zone has to be created in Config.SellingZones
 ---@field prop? string Custom prop
----@field disableHustle? boolean If set to true then it can't be sold in hustling
 
 ---@type table<string, Drug>
 Config.Drugs = {
@@ -88,36 +87,35 @@ Config.SellingZones = {
     }
 }
 
----@class HustleClient
----@field models string | string[]
----@field locations vector4[]
----@field fail? number Percent to fail to find a client
+---@class WholesaleZone
+---@field blip? BlipData
+---@field locations vector3[]
+---@field radius? number Default radius is 100.0
+---@field message? { enter: string, exit: string }
+---@field account? AccountType
 
----@class Hustling
----@field disabled? boolean
----@field command string
----@field clients HustleClient
----@field divider number Price divider, by this value the price will be multiplied, you want to set it as lower as you can, so it won't be op
----@field amount number Maximum amount of drugs to be sold (random value between 1 and this value)
----@field attempts number Maximum attempts to renegotiate the deal
----@field delay number Delay between hustling again (in minutes)
----@field account AccountType
+---@class Wholesale
+---@field disabled? boolean If set to true then it won't be possible to sell wholesale ...
+---@field requiredItem string If defined then the wholesale selling will start by using this item
+---@field wholesaleZones WholesaleZone[]
 
----@type Hustling
-Config.Hustling = {
-    command = 'hustledrugs',
-    clients = {
-        models = { `g_m_importexport_01`, `g_m_m_mexboss_01`, `g_m_m_armboss_01`, `g_m_y_ballaorig_01` },
-        locations = {
-            vector4(-61.5496, -1844.5692, 26.5942, 325.3091)
-        },
-        fail = 15
-    },
-    divider = 0.5,
-    amount = 50,
-    attempts = 2,
-    delay = 10,
-    account = 'money'
+---@type Wholesale
+Config.Wholesale = {
+    requiredItem = 'drug_phone',
+    wholesaleZones = {
+        {
+            blip = {
+                name = 'El Burro Heights',
+                color = 1,
+                scale = 0.75,
+                sprite = 469
+            },
+            radius = 150.0,
+            locations = {
+                vector3(1312.5529, -1662.1328, 51.2363)
+            }
+        }
+    }
 }
 
 --- Editable codes
@@ -155,4 +153,6 @@ if not IsDuplicityVersion() then
             prop = prop
         })
     end
+
+    lib.callback.register('prp-drugsales:progress', Config.ProgressBar)
 end
