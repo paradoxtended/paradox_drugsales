@@ -47,6 +47,7 @@ Config.Webhook = 'WEBHOOK_HERE'
 ---@field rep? { add: number, remove: number } | number Reputation system (if deal ends successfully then your reputation will be higher otherwise you'll lose reputation)
 ---@field zones? string[] If defined then you need to be in one of the specified zone to be able to sell the drug. Zone has to be created in Config.SellingZones
 ---@field prop? string Custom prop
+---@field wholesale? { chance: number, max: number } If not defined then it will be impossible to sell in wholesale
 
 ---@type table<string, Drug>
 Config.Drugs = {
@@ -54,11 +55,13 @@ Config.Drugs = {
         price = { min = 125, max = 180 },
         amount = { min = 1, max = 5 },
         rep = { add = 0.02, remove = 0.01 },
-        zones = { 'Forum Drive' }
+        zones = { 'Forum Drive' },
+        wholesale = { chance = 75, max = 75 }
     },
     ['coke_bag'] = {
         price = { min = 150, max = 200 },
-        amount = { min = 1, max = 5 }
+        amount = { min = 1, max = 5 },
+        wholesale = { chance = 50, max = 50 }
     }
 }
 
@@ -93,15 +96,31 @@ Config.SellingZones = {
 ---@field radius? number Default radius is 100.0
 ---@field message? { enter: string, exit: string }
 ---@field account? AccountType
+---@field minReputation? number
+---@field waitTime { min: integer, max: integer } In seconds
+---@field drugsVariety number How many types of drugs (meth_bag, coke_bag) can be offered from client at once
+---@field drugsList? string[]
+---@field divisor number The total reward gets divided by this value
 
 ---@class Wholesale
 ---@field disabled? boolean If set to true then it won't be possible to sell wholesale ...
+---@field client { models: string | string[], blip: BlipData, attempts: number }  Clients data
 ---@field requiredItem string If defined then the wholesale selling will start by using this item
 ---@field wholesaleZones WholesaleZone[]
 
 ---@type Wholesale
 Config.Wholesale = {
     requiredItem = 'drug_phone',
+    client = {
+        models = { `g_m_m_mexboss_01`, `g_m_m_armboss_01`, `g_m_importexport_01` },
+        blip = {
+            name = 'Client',
+            color = 1,
+            scale = 0.75,
+            sprite = 480
+        },
+        attempts = 2 -- Attempts to renegotiate
+    },
     wholesaleZones = {
         {
             blip = {
@@ -110,10 +129,14 @@ Config.Wholesale = {
                 scale = 0.75,
                 sprite = 469
             },
-            radius = 150.0,
             locations = {
                 vector3(1312.5529, -1662.1328, 51.2363)
-            }
+            },
+            radius = 150.0,
+            waitTime = { min = 3, max = 7 },
+            drugsVariety = 3,
+            -- drugsList = { 'meth_bag' },
+            divisor = 2.0
         }
     }
 }

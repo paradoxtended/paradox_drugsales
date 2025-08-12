@@ -5,11 +5,16 @@ local function updated(rep)
     if not rep then return end
 
     reputation = rep
+    UpdateWholesale(reputation)
 end
 
 lib.callback('prp_drugsales:getReputation', false, updated)
 
-Framework.onPlayerLoaded(function()
+RegisterNetEvent('esx:playerLoaded', function()
+    lib.callback('prp_drugsales:getReputation', 100, updated)
+end)
+
+RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
     lib.callback('prp_drugsales:getReputation', 100, updated)
 end)
 

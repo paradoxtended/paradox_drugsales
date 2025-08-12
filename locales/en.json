@@ -16,5 +16,8 @@
     "drugs_took": "You have successfully took drugs.",
     "webhook_sold": "Sold %sx %s for %s. Sold at (coords): %s",
     "searching_client": "Posting announcement...",
-    "not_in_zone": "You are not in zone for wholesale."
+    "posted_announcement": "You have posted an announcement. Wait for clients to get in touch with you.",
+    "not_in_zone": "You are not in zone for wholesale.",
+    "found_client": "A client responded to your announcement. Wait for him.",
+    "client_died": "Your client died."
 }

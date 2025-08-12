@@ -54,6 +54,18 @@ function Utils.hasDrug(player)
     return false
 end
 
+---Helper function which is returning all drugs
+---@return string[]
+function Utils.getAllDrugs()
+    local drugs = {}
+
+    for drugName, _ in pairs(Config.Drugs) do
+        table.insert(drugs, drugName)
+    end
+
+    return drugs
+end
+
 local labels, ready
 
 CreateThread(function()
