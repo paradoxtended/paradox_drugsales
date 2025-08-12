@@ -47,7 +47,7 @@ Config.Webhook = 'WEBHOOK_HERE'
 ---@field rep? { add: number, remove: number } | number Reputation system (if deal ends successfully then your reputation will be higher otherwise you'll lose reputation)
 ---@field zones? string[] If defined then you need to be in one of the specified zone to be able to sell the drug. Zone has to be created in Config.SellingZones
 ---@field prop? string Custom prop
----@field disableHustle? boolean
+---@field disableHustle? boolean If set to true then it can't be sold in hustling
 
 ---@type table<string, Drug>
 Config.Drugs = {
@@ -97,6 +97,11 @@ Config.SellingZones = {
 ---@field disabled? boolean
 ---@field command string
 ---@field clients HustleClient
+---@field divider number Price divider, by this value the price will be multiplied, you want to set it as lower as you can, so it won't be op
+---@field amount number Maximum amount of drugs to be sold (random value between 1 and this value)
+---@field attempts number Maximum attempts to renegotiate the deal
+---@field delay number Delay between hustling again (in minutes)
+---@field account AccountType
 
 ---@type Hustling
 Config.Hustling = {
@@ -108,6 +113,11 @@ Config.Hustling = {
         },
         fail = 15
     },
+    divider = 0.5,
+    amount = 50,
+    attempts = 2,
+    delay = 10,
+    account = 'money'
 }
 
 --- Editable codes

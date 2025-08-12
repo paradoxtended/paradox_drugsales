@@ -38,14 +38,18 @@ RegisterNuiCallback('closeDrugsale', function(data, cb)
 end)
 
 ---@param items { label: string, price: number, amount: number }[]
-function waitForHustle(items)
+---@param renegotiate? boolean
+function waitForHustle(items, renegotiate)
     if input then return end
     input = promise.new()
 
     SetNuiFocus(true, true)
     SendNUIMessage({
         action = 'hustle',
-        data = items
+        data = {
+            items = items,
+            renegotiate = renegotiate
+        }
     })
 
     return Citizen.Await(input)

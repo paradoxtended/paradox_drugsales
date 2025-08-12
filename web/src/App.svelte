@@ -11,11 +11,14 @@ interface Drugsale {
   rep: number;
 }
 
-type Hustle = {
-  label: string;
-  price: number;
-  amount: number;
-}[];
+interface Hustle {
+  items: {
+    label: string;
+    price: number;
+    amount: number;
+  }[],
+  renegotiate?: boolean;
+}
 
 let drug: Drugsale | undefined = $state();
 let hustle: Hustle | undefined = $state();
@@ -60,12 +63,15 @@ debugData<Drugsale>([
 debugData<Hustle>([
   {
     action: 'hustle',
-    data: [
+    data: {
+      items: [
         { label: 'Rolex', price: 21, amount: 4 },
         { label: 'Gold Coins', price: 20, amount: 5 },
         { label: 'Camera', price: 26, amount: 4 },
         { label: 'Meth Bag', price: 75, amount: 24 }
-      ]
+      ],
+      renegotiate: true,
+    }
   }
 ])
 
@@ -180,14 +186,14 @@ function onKeyDown(event: KeyboardEvent) {
     <div class="text-white w-[565px] absolute top-[80%] left-1/2 -translate-x-1/2 -translate-y-1/2 flex justify-center items-center flex-col gap-3">
       <p class="text-lg text-lime-500">OFFER</p>
       <p class="text-4xl text-center">
-        {hustle.reduce((sum, item) => sum + (item.price * item.amount), 0).toFixed(0)} BILLS FOR
-        {hustle.reduce((sum, item) => sum + item.amount, 0).toFixed(0)} ITEMS
+        {hustle.items.reduce((sum, item) => sum + (item.price * item.amount), 0).toFixed(0)} BILLS FOR
+        {hustle.items.reduce((sum, item) => sum + item.amount, 0).toFixed(0)} ITEMS
       </p>
       <p class="text-neutral-400 font-[Inter] text-sm text-center">
-        {#each hustle as item, i}
+        {#each hustle.items as item, i}
           <span style="white-space: nowrap;">
             {item.amount}x {item.label} for {item.price * item.amount} bills
-          </span>{i < hustle.length - 1 ? ', ' : ''}
+          </span>{i < hustle.items.length - 1 ? ', ' : ''}
         {/each}
       </p>
     </div>
@@ -204,11 +210,13 @@ function onKeyDown(event: KeyboardEvent) {
           ACCEPT OFFER
         </button>
 
-        <button class="bg-black/50 w-[300px] text-start text-lg px-7 py-3 rounded-lg border border-neutral-600 hover:bg-black/30 transition-all duration-300"
-        onclick={() => closeHustle('negotiate')}>
-          NEGOTIATE
-          <p class="text-neutral-400 font-[Inter] text-sm">Renegotiate the prices.</p>
-        </button>
+        {#if hustle.renegotiate}
+          <button class="bg-black/50 w-[300px] text-start text-lg px-7 py-3 rounded-lg border border-neutral-600 hover:bg-black/30 transition-all duration-300"
+          onclick={() => closeHustle('negotiate')}>
+            NEGOTIATE
+            <p class="text-neutral-400 font-[Inter] text-sm">Renegotiate the prices.</p>
+          </button>
+        {/if}
       </div>
     </div>
   </div>
