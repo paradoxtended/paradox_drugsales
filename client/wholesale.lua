@@ -1,11 +1,9 @@
 if Config.Wholesale.disabled then return end
 
-local GetScriptTaskStatus = GetScriptTaskStatus
-
 ---@type { normal: integer, radius: integer }[], CZone[], number
 local blips, zones, attempt = {}, {}, 0
----@type { index: integer, locationIndex: integer }?
-local currentZone
+---@type { index: integer, locationIndex: integer }?, integer?
+local currentZone, currentClient
 
 ---@param level number
 local function updateWholesaleZones(level)
@@ -71,45 +69,105 @@ local function createClient()
 
     local blip = Utils.createEntityBlip(ped, Config.Wholesale.client.blip)
 
-    return ped, blip
+    local p = promise.new()
+
+    CreateThread(function()
+        while not Utils.distanceCheck(cache.ped, ped, 5.0) and not IsPedDeadOrDying(ped, false) do Wait(500) end
+
+        if IsPedDeadOrDying(ped, false) then
+            Config.Notify(locale('client_died'), 'error')
+        end
+
+        RemoveBlip(blip)
+        p:resolve(not IsPedDeadOrDying(ped, false) and ped or false)
+    end)
+
+    local client =  Citizen.Await(p)
+
+    currentClient = client
 end
 
----Cannot do this with promises because player won't be able to use other item (weapon, food...)
+--- Feel free to edit this function if you don't like the animation when deal ends successfully
+local function createSyncScene()
+    local ped = currentClient
+
+    local coords = GetEntityCoords(ped)
+    local rotation = GetEntityRotation(ped)
+
+    lib.requestAnimDict('mp_ped_interaction')
+
+    local netScene = NetworkCreateSynchronisedScene(coords.x, coords.y, coords.z, rotation.x, rotation.y, rotation.z, 0, false, false, 1065353216, 0, 1.0)
+    NetworkAddPedToSynchronisedScene(cache.ped, netScene, 'mp_ped_interaction', 'hugs_guy_b', 3.0, 3.0, 1, 16, 1148846080, 0)
+    NetworkAddPedToSynchronisedScene(ped, netScene, 'mp_ped_interaction', 'hugs_guy_a', 3.0, 3.0, 1, 16, 1148846080, 0)
+
+    NetworkStartSynchronisedScene(netScene)
+
+    RemoveAnimDict('mp_ped_interaction')
+end
+
 ---@param items { label: string, name: string, amount: number, price: number }[]
-lib.callback.register('prp_drugsales:itemUsed', function(items)
+local function itemUsed(items)
     local zone = Config.Wholesale.wholesaleZones[currentZone.index]
+    local coords = zone.locations[currentZone.locationIndex]
 
     if not Config.ProgressBar(locale('searching_client'), 8000, true, {
         scenario = 'WORLD_HUMAN_STAND_MOBILE'
     }) then return end
-
     Config.Notify(locale('posted_announcement'), 'inform')
 
     local p = promise.new()
 
+    local interval = SetInterval(function()
+        if not Utils.distanceCheck(cache.ped, coords, zone.radius or 100.0) then
+            p:resolve(false)
+        end
+    end, 100) --[[@as number?]]
+
+    local function wait(milliseconds)
+        Wait(milliseconds)
+
+        return p.state == 0
+    end
+
     CreateThread(function()
-        Wait(math.random(zone.waitTime.min, zone.waitTime.max) * 1000)
+        if not wait(math.random(zone.waitTime.min, zone.waitTime.max) * 1000) then return end
 
         Config.Notify(locale('found_client'), 'inform')
 
-        local ped, blip = createClient()
-
-        while not Utils.distanceCheck(cache.ped, ped, 5.0) and not IsPedDeadOrDying(ped, false) do Wait(200) end
-            
-        if IsPedDeadOrDying(ped, false) then
-            Config.Notify(locale('client_died'), 'error')
-            return false
+        if interval then
+            ClearInterval(interval)
+            interval = nil
         end
 
-        RemoveBlip(blip)
+        createClient()
+        local result = currentClient and waitForHustle(items, attempt < Config.Wholesale.client.attempts)
 
-        local result = waitForHustle(items, attempt < Config.Wholesale.client.attempts)
-        p:resolve(result)
+        p:resolve(currentClient and result)
     end)
 
-    ---@todo fix this callback
-    return Citizen.Await(p)
-end)
+    local success = Citizen.Await(p)
+    
+    while success == 'negotiate' and attempt < Config.Wholesale.client.attempts do
+        Wait(350)
+        attempt += 1
+
+        local items = lib.callback.await('prp_drugsales:finish', false, success)
+        success = waitForHustle(items, attempt < Config.Wholesale.client.attempts)
+    end
+
+    local netId = NetworkGetNetworkIdFromEntity(currentClient)
+    local success = lib.callback.await('prp_drugsales:finish', false, success, netId)
+
+    if success then
+        Config.Notify(locale('deal_success'), 'success')
+        createSyncScene()
+    end
+
+    SetEntityAsNoLongerNeeded(currentClient)
+    currentClient, attempt = nil, 0
+end
+
+RegisterNetEvent('prp_drugsales:itemUsed', itemUsed)
 
 lib.callback.register('prp_drugsales:getWholesaleZone', function()
     return currentZone

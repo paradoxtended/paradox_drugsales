@@ -73,12 +73,12 @@ jobs:
 
       - name: Bundle files
         run: |
-          mkdir -p ./temp/prp-drugsales
-          mkdir -p ./temp/prp-drugsales/web
-          cp ./{README.md,LICENSE,fxmanifest.lua,init.lua,config.lua} ./temp/prp-drugsales
-          cp -r ./{client,server,locales} ./temp/prp-drugsales
-          cp -r ./web/dist ./temp/prp-drugsales/web/dist
-          cd ./temp && zip -r ../prp-drugsales.zip ./prp-drugsales
+          mkdir -p ./temp/prp_drugsales
+          mkdir -p ./temp/prp_drugsales/web
+          cp ./{README.md,LICENSE,fxmanifest.lua,init.lua,config.lua} ./temp/prp_drugsales
+          cp -r ./{client,server,locales,install} ./temp/prp_drugsales
+          cp -r ./web/dist ./temp/prp_drugsales/web/dist
+          cd ./temp && zip -r ../prp_drugsales.zip ./prp_drugsales
 
       - name: Create Release
         uses: "marvinpinto/action-automatic-releases@v1.2.1"
@@ -87,7 +87,7 @@ jobs:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           title: "${{ env.RELEASE_VERSION }}"
           prerelease: false
-          files: prp-drugsales.zip
+          files: prp_drugsales.zip
 
         env:
           CI: false

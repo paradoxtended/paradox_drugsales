@@ -1,5 +1,8 @@
 if Config.Wholesale.disabled then return end
 
+---@type table<integer, { label: string, name: string, amount: number, price: number }[]>
+local pending = {}
+
 ---@param player Player
 ---@param drug string[]
 ---@param data WholesaleZone
@@ -22,11 +25,66 @@ local function getRandomDrugs(player, drug, data)
         end
     end
 
+    pending[player.source] = drugs
+
     return drugs
 end
 
 ---@type table<integer, boolean>
 local busy = {}
+
+---@param source number
+---@param type 'confirmed' | 'negotiate' | false
+---@param netId number?
+lib.callback.register('prp_drugsales:finish', function(source, type, netId)
+    local player = Framework.getPlayerFromId(source)
+
+    if not player or player:getItemCount(Config.Wholesale.requiredItem) == 0 or not busy[source] then return end
+
+    ---@type { index: integer, locationIndex: integer }?
+    local currentZone = lib.callback.await('prp_drugsales:getWholesaleZone', source)
+
+    if not currentZone then
+        TriggerClientEvent('prp-drugsales:notify', source, locale('not_in_zone'), 'error')
+        busy[source] = nil
+        return
+    end
+
+    local data = Config.Wholesale.wholesaleZones[currentZone.index]
+    local drugsList = currentZone and Config.Wholesale.wholesaleZones[currentZone.index]?.drugsList or Utils.getAllDrugs()
+
+    if netId then
+        local entity = NetworkGetEntityFromNetworkId(netId)
+        
+        if entity then
+            SetTimeout(10000, function()
+                DeleteEntity(entity)
+            end)
+        end
+    end
+
+    if type == 'negotiate' then
+        return getRandomDrugs(player, drugsList, data)
+    end
+
+    if type == 'confirmed' and pending[source] then
+        local items = pending[source]
+
+        SetTimeout(1500, function()
+            for _, item in ipairs(items) do
+                if player:getItemCount(item.name) < item.amount then return end
+                
+                player:removeItem(item.name, item.amount)
+                player:addAccountMoney(data.account or Config.DefaultAccount, item.price * item.amount)
+            end
+        end)
+    end
+
+    pending[source] = nil
+    busy[source] = nil
+
+    return type ~= false
+end)
 
 Framework.registerUsableItem(Config.Wholesale.requiredItem, function(source)
     local player = Framework.getPlayerFromId(source)
@@ -56,6 +114,11 @@ Framework.registerUsableItem(Config.Wholesale.requiredItem, function(source)
     local drugsList = currentZone and Config.Wholesale.wholesaleZones[currentZone.index]?.drugsList or Utils.getAllDrugs()
     local drugs = getRandomDrugs(player, drugsList, data)
 
-    local success = lib.callback.await('prp_drugsales:itemUsed', source, drugs)
-    print(success)
+    if #drugs < 1 then
+        TriggerClientEvent('prp-drugsales:notify', source, locale('nothing_to_offer'), 'error')
+        busy[source] = nil
+        return
+    end
+
+    TriggerClientEvent('prp_drugsales:itemUsed', source, drugs)
 end)

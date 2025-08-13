@@ -62,6 +62,21 @@ Config.Drugs = {
         price = { min = 150, max = 200 },
         amount = { min = 1, max = 5 },
         wholesale = { chance = 50, max = 50 }
+    },
+    ['heroin_bag'] = {
+        price = { min = 100, max = 120 },
+        amount = { min = 1, max = 5 },
+        wholesale = { chance = 75, max = 85 }
+    },
+    ['weed_bag'] = {
+        price = { min = 75, max = 90 },
+        amount = { min = 1, max = 5 },
+        wholesale = { chance = 90, max = 100 }
+    },
+    ['weed_joint'] = {
+        price = { min = 90, max = 110 },
+        amount = { min = 1, max = 5 },
+        wholesale = { chance = 60, max = 200 }
     }
 }
 
@@ -132,8 +147,8 @@ Config.Wholesale = {
             locations = {
                 vector3(1312.5529, -1662.1328, 51.2363)
             },
-            radius = 150.0,
-            waitTime = { min = 3, max = 7 },
+            radius = 100.0,
+            waitTime = { min = 10, max = 20 },
             drugsVariety = 3,
             -- drugsList = { 'meth_bag' },
             divisor = 2.0
