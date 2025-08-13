@@ -106,19 +106,20 @@ Config.SellingZones = {
 }
 
 ---@class WholesaleZone
----@field blip? BlipData
+---@field blip BlipData?
 ---@field locations vector3[]
----@field radius? number Default radius is 100.0
----@field message? { enter: string, exit: string }
----@field account? AccountType
----@field minReputation? number
+---@field radius number? Default radius is 100.0
+---@field message { enter: string, exit: string }?
+---@field account AccountType?
+---@field minReputation number?
 ---@field waitTime { min: integer, max: integer } In seconds
 ---@field drugsVariety number How many types of drugs (meth_bag, coke_bag) can be offered from client at once
----@field drugsList? string[]
+---@field drugsList string[]?
 ---@field divisor number The total reward gets divided by this value
+---@field dispatchChance number?
 
 ---@class Wholesale
----@field disabled? boolean If set to true then it won't be possible to sell wholesale ...
+---@field disabled boolean? If set to true then it won't be possible to sell wholesale ...
 ---@field client { models: string | string[], blip: BlipData, attempts: number }  Clients data
 ---@field requiredItem string If defined then the wholesale selling will start by using this item
 ---@field wholesaleZones WholesaleZone[]
@@ -130,7 +131,7 @@ Config.Wholesale = {
         models = { `g_m_m_mexboss_01`, `g_m_m_armboss_01`, `g_m_importexport_01` },
         blip = {
             name = 'Client',
-            color = 1,
+            color = 0,
             scale = 0.75,
             sprite = 480
         },
@@ -147,10 +148,9 @@ Config.Wholesale = {
             locations = {
                 vector3(1312.5529, -1662.1328, 51.2363)
             },
-            radius = 100.0,
+            radius = 120.0,
             waitTime = { min = 10, max = 20 },
             drugsVariety = 3,
-            -- drugsList = { 'meth_bag' },
             divisor = 2.0
         }
     }

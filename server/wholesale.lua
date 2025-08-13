@@ -71,11 +71,22 @@ lib.callback.register('prp_drugsales:finish', function(source, type, netId)
         local items = pending[source]
 
         SetTimeout(1500, function()
+            local webhook = { message = {}, total = 0 }
+
             for _, item in ipairs(items) do
                 if player:getItemCount(item.name) < item.amount then return end
                 
                 player:removeItem(item.name, item.amount)
                 player:addAccountMoney(data.account or Config.DefaultAccount, item.price * item.amount)
+
+                table.insert(webhook.message, ('%sx %s for %s bills'):format(item.amount, item.label, item.price * item.amount))
+                webhook.total += item.price * item.amount
+            end
+
+            Utils.logToDiscord(source, player, locale('webhook_wholesale_sold', table.concat(webhook.message, ', '), webhook.total, GetEntityCoords(GetPlayerPed(source))))
+            if math.random(100) <= (data.dispatchChance or Config.DispatchData.Chance) then
+                TriggerClientEvent('prp-drugsales:notify', source, locale('dispatched'), 'inform')
+                Utils.dispatch(GetEntityCoords(GetPlayerPed(source)))
             end
         end)
     end

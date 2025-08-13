@@ -63,7 +63,7 @@ local function createClient()
     lib.requestModel(model)
 
     local ped = CreatePed(4, model, coords.x, coords.y, coords.z, 0.0, true, false)
-    TaskGoToEntity(ped, cache.ped, -1, 5.0, 1.5, 1073741824, 0)
+    TaskGoToEntity(ped, cache.ped, -1, 3.0, 1.5, 1073741824, 0)
     SetBlockingOfNonTemporaryEvents(ped, true)
     SetModelAsNoLongerNeeded(model)
 
@@ -72,7 +72,7 @@ local function createClient()
     local p = promise.new()
 
     CreateThread(function()
-        while not Utils.distanceCheck(cache.ped, ped, 5.0) and not IsPedDeadOrDying(ped, false) do Wait(500) end
+        while not Utils.distanceCheck(cache.ped, ped, 3.0) and not IsPedDeadOrDying(ped, false) do Wait(500) end
 
         if IsPedDeadOrDying(ped, false) then
             Config.Notify(locale('client_died'), 'error')
@@ -83,6 +83,14 @@ local function createClient()
     end)
 
     local client =  Citizen.Await(p)
+
+    local target = GetEntityCoords(cache.ped)
+    local coords = GetEntityCoords(ped)
+    local clientHeading = GetHeadingFromVector_2d(target.x - coords.x, target.y - coords.y)
+    local pedHeading = GetHeadingFromVector_2d(coords.x - target.x, coords.y - target.y)
+
+    SetEntityHeading(ped, clientHeading)
+    SetEntityHeading(cache.ped, pedHeading)
 
     currentClient = client
 end
@@ -140,6 +148,15 @@ local function itemUsed(items)
         end
 
         createClient()
+
+        lib.playAnim(currentClient, 'timetable@amanda@ig_2', 'ig_2_base_amanda', 3.0, 3.0, -1, 11)
+        Config.ProgressBar(locale('introducing_yourself'), 3000, false, {
+            dict = 'oddjobs@assassinate@vice@hooker',
+            clip = 'argue_a',
+            flag = 0
+        })
+        lib.playAnim(cache.ped, 'timetable@amanda@ig_2', 'ig_2_base_amanda', 3.0, 3.0, -1, 11)
+
         local result = currentClient and waitForHustle(items, attempt < Config.Wholesale.client.attempts)
 
         p:resolve(currentClient and result)
@@ -148,7 +165,16 @@ local function itemUsed(items)
     local success = Citizen.Await(p)
     
     while success == 'negotiate' and attempt < Config.Wholesale.client.attempts do
-        Wait(350)
+        if not Config.ProgressBar(locale('renegotiating_deal'), 8000, true, {
+            dict = 'oddjobs@assassinate@vice@hooker',
+            clip = 'argue_a',
+            flag = 0
+        }) then
+            success = false
+            break
+        end
+
+        lib.playAnim(cache.ped, 'timetable@amanda@ig_2', 'ig_2_base_amanda', 3.0, 3.0, -1, 11)
         attempt += 1
 
         local items = lib.callback.await('prp_drugsales:finish', false, success)

@@ -1,4 +1,5 @@
 Utils = {}
+local resourceName = GetCurrentResourceName()
 
 ---@generic K, V
 ---@param t table<K, V>
