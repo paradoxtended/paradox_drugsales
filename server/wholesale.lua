@@ -69,32 +69,43 @@ lib.callback.register('prp_drugsales:finish', function(source, type, netId)
 
     if type == 'confirmed' and pending[source] then
         local items = pending[source]
+        ---@type { items: { name: string, amount: number }[], reputation: number, message: string[], total: number }
+        local store = { items = {}, message = {}, reputation = 0, total = 0 }
+
+        for _, item in ipairs(items) do
+            if player:getItemCount(item.name) < item.amount then return end
+            
+            table.insert(store.items, { name = item.name, amount = item.amount })
+            store.reputation += Config.Drugs[item.name].rep?.add or Config.DefaultRep
+            store.total += item.price * item.amount
+            table.insert(store.message, ('%sx %s for %s bills'):format(item.amount, item.label, item.price * item.amount))
+        end
 
         SetTimeout(1500, function()
-            local webhook = { message = {}, total = 0 }
-
-            for _, item in ipairs(items) do
-                if player:getItemCount(item.name) < item.amount then return end
-                
+            for _, item in ipairs(store.items) do
                 player:removeItem(item.name, item.amount)
-                player:addAccountMoney(data.account or Config.DefaultAccount, item.price * item.amount)
-
-                table.insert(webhook.message, ('%sx %s for %s bills'):format(item.amount, item.label, item.price * item.amount))
-                webhook.total += item.price * item.amount
             end
 
-            Utils.logToDiscord(source, player, locale('webhook_wholesale_sold', table.concat(webhook.message, ', '), webhook.total, GetEntityCoords(GetPlayerPed(source))))
-            if math.random(100) <= (data.dispatchChance or Config.DispatchData.Chance) then
-                TriggerClientEvent('prp-drugsales:notify', source, locale('dispatched'), 'inform')
-                Utils.dispatch(GetEntityCoords(GetPlayerPed(source)))
-            end
+            player:addAccountMoney(data.account or Config.DefaultAccount, store.total)
+            addPlayerRep(player, store.reputation / data.divisor)
+            Utils.logToDiscord(source, player, locale('webhook_wholesale_sold', table.concat(store.message, ', '), store.total, GetEntityCoords(GetPlayerPed(source))))
         end)
+
+        pending[source] = nil
+        busy[source] = nil
+
+        return true
     end
 
     pending[source] = nil
     busy[source] = nil
 
-    return type ~= false
+    if math.random(100) <= (data.dispatchChance or Config.DispatchData.Chance) then
+        TriggerClientEvent('prp-drugsales:notify', source, locale('dispatched'), 'inform')
+        Utils.dispatch(GetEntityCoords(GetPlayerPed(source)))
+    end
+
+    return false
 end)
 
 Framework.registerUsableItem(Config.Wholesale.requiredItem, function(source)

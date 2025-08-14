@@ -48,6 +48,7 @@ function waitForHustle(items, renegotiate)
         action = 'hustle',
         data = {
             items = items,
+            rep = getPlayerRep(),
             renegotiate = renegotiate
         }
     })

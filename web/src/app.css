@@ -84,6 +84,7 @@ body {
   color: #ffffff;
   font-size: 17px;
   animation: repAnimIn 250ms forwards;
+  z-index: 1;
 }
 
 .rep-shape {

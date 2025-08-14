@@ -7,6 +7,18 @@ local currentZone, currentClient
 
 ---@param level number
 local function updateWholesaleZones(level)
+    for _, blip in ipairs(blips) do
+        RemoveBlip(blip.normal)
+        RemoveBlip(blip.radius)
+    end
+
+    for _, zone in ipairs(zones) do
+        zone:remove()
+    end
+
+    table.wipe(blips)
+    table.wipe(zones)
+
     for index, data in ipairs(Config.Wholesale.wholesaleZones) do
         if data.minReputation and data.minReputation > level then return end
         for locationIndex, coords in ipairs(data.locations) do
@@ -189,6 +201,7 @@ local function itemUsed(items)
         createSyncScene()
     end
 
+    ClearPedTasks(cache.ped)
     SetEntityAsNoLongerNeeded(currentClient)
     currentClient, attempt = nil, 0
 end

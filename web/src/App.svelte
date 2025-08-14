@@ -17,6 +17,7 @@ interface Hustle {
     price: number;
     amount: number;
   }[],
+  rep: number;
   renegotiate?: boolean;
 }
 
@@ -70,6 +71,7 @@ debugData<Hustle>([
         { label: 'Camera', price: 26, amount: 4 },
         { label: 'Meth Bag', price: 75, amount: 24 }
       ],
+      rep: 0.54,
       renegotiate: true,
     }
   }
@@ -117,10 +119,12 @@ function closeNui(sold?: boolean) {
 
 function closeHustle(result: 'confirmed' | 'negotiate' | false) {
   const container = document.querySelector('.hustle-container') as HTMLElement;
+  const repWrapper = document.querySelector('.rep-wrapper') as HTMLElement;
 
   if (container === null) return;
 
   container.style.animation = 'fadeOut 300ms forwards';
+  if (repWrapper) repWrapper.style.animation = 'repAnimOut 250ms forwards';
 
   setTimeout(() => hustleVisible = false, 300);
 
@@ -182,6 +186,13 @@ function onKeyDown(event: KeyboardEvent) {
 {/if}
 
 {#if hustleVisible && hustle}
+  <div class="rep-wrapper">
+    <p>YOUR REPUTATION:</p>
+    <div class="relative">
+      <div class="rep-shape"></div>
+      <p class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-sm">{Number(hustle.rep.toFixed(2)).toString()}</p>
+    </div>
+  </div>
   <div class="hustle-container">
     <div class="text-white w-[565px] absolute top-[80%] left-1/2 -translate-x-1/2 -translate-y-1/2 flex justify-center items-center flex-col gap-3">
       <p class="text-lg text-lime-500">OFFER</p>

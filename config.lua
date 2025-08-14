@@ -54,18 +54,20 @@ Config.Drugs = {
     ['meth_bag'] = {
         price = { min = 125, max = 180 },
         amount = { min = 1, max = 5 },
-        rep = { add = 0.02, remove = 0.01 },
+        rep = { add = 0.03, remove = 0.02 },
         zones = { 'Forum Drive' },
         wholesale = { chance = 75, max = 75 }
     },
     ['coke_bag'] = {
         price = { min = 150, max = 200 },
         amount = { min = 1, max = 5 },
+        rep = { add = 0.04, remove = 0.03 },
         wholesale = { chance = 50, max = 50 }
     },
     ['heroin_bag'] = {
         price = { min = 100, max = 120 },
         amount = { min = 1, max = 5 },
+        rep = { add = 0.02, remove = 0.01 },
         wholesale = { chance = 75, max = 85 }
     },
     ['weed_bag'] = {
@@ -115,7 +117,7 @@ Config.SellingZones = {
 ---@field waitTime { min: integer, max: integer } In seconds
 ---@field drugsVariety number How many types of drugs (meth_bag, coke_bag) can be offered from client at once
 ---@field drugsList string[]?
----@field divisor number The total reward gets divided by this value
+---@field divisor number The total reward and reputation gets divided by this value
 ---@field dispatchChance number?
 
 ---@class Wholesale
