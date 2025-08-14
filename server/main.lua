@@ -1,5 +1,57 @@
----@type table<integer, { drug: string, amount: number }>
-local clients = {}
+---@type table<integer, { name: string, amount: number }[]>
+local robberies = {}
+
+---@param netId number
+---@param items { name: string, amount: number }[]
+RegisterNetEvent('prp_drugsales:rob', function(netId, items)
+    local player = Framework.getPlayerFromId(source)
+    local entity = NetworkGetEntityFromNetworkId(netId)
+
+    if not player or not entity or robberies[netId] then return end
+
+    if type(items) ~= 'table' or table.type(items) ~= 'array' then items = { items } end
+    
+    robberies[netId] = {}
+
+    for i = 1, #items do
+        local option = items[i]
+
+        player:removeItem(option.name, option.amount)
+        robberies[netId][i] = { name = option.name, amount = option.amount }
+    end
+
+    TriggerClientEvent('prp_drugsales:registerRobbery', -1, netId)
+end)
+
+---@param source number
+---@param netId number
+lib.callback.register('prp_drugsales:robbery', function(source, netId)
+    local player = Framework.getPlayerFromId(source)
+    local entity = NetworkGetEntityFromNetworkId(netId)
+
+    if not player or not entity then return end
+
+    -- Possible exploiter or cheater or 2 players are looting the ped
+    if not robberies[netId] then
+        -- YOUR CODE HERE
+        return
+    end
+
+    if #(GetEntityCoords(GetPlayerPed(source)) - GetEntityCoords(entity)) > 3.0 then return end
+
+    for _, item in ipairs(robberies[netId]) do
+        player:addItem(item.name, item.amount)
+    end
+
+    robberies[netId] = nil
+    TriggerClientEvent('prp_drugsales:unregisterRobbery', -1, netId)
+
+    SetTimeout(10000, function()
+        DeleteEntity(entity)
+    end)
+
+    return true
+end)
 
 ---@param source number
 ---@param drugName string
@@ -28,52 +80,10 @@ lib.callback.register('prp-drugsales:getDrugAmount', function(source, drugName)
     return amount
 end)
 
----@param netId number
----@param drugName string
----@param amount number
-RegisterNetEvent('prp_drugsales:registerRobbery', function(netId, drugName, amount)
-    local entity = NetworkGetEntityFromNetworkId(netId)
-
-    if not entity then return end
-
-    clients[netId] = {
-        drug = drugName,
-        amount = amount
-    }
-
-    TriggerClientEvent('prp_drugsales:robbedPlayer', -1, netId)
-end)
-
 ---@param source number
 ---@param netId number
-lib.callback.register('prp_drugsales:takeDrugs', function(source, netId)
-    local player = Framework.getPlayerFromId(source)
-
-    if not player then return end
-
-    local client = clients[netId]
-
-    -- If there is not client with netId then it's sure that this event has been triggered with executor (cheater executed it),
-    -- or there is an option that players want to "fake it" by looting the same ped at the same time
-    -- you can do whatever you want here (kick or ban player, it's up to you)
-    if not client then
-        -- YOUR CODE HERE
-        return
-    end
-
-    clients[netId] = nil
-
-    player:addItem(client.drug, client.amount)
-
-    TriggerClientEvent('prp_drugsales:unregisterRobbery', -1, netId)
-
-    return true
-end)
-
----@param player Player
----@param drugName string
----@param amount number
-local function refuseDeal(player, drugName, amount)
+---@param items { name: string, amount: number }[]
+local function refuseDeal(source, netId, items)
     TriggerClientEvent('prp-drugsales:notify', source, locale('client_refused'), 'error')
     
     local random = math.random(100)
@@ -83,13 +93,14 @@ local function refuseDeal(player, drugName, amount)
 
     -- Client refuse and attack player
     if random > 33 and random < 66 then
-        return TriggerClientEvent('prp_drugsales:attackPlayer', player.source)
+        TriggerClientEvent('prp_drugsales:attack', source, netId)
+        return
     end
 
     -- Client refuse to pay and steal drug from player
     if random > 66 then
-        player:removeItem(drugName, amount)
-        return TriggerClientEvent('prp_drugsales:robPlayer', player.source, drugName, amount)
+        TriggerClientEvent('prp_drugsales:rob', source, netId, items)
+        return
     end
 end
 
@@ -97,7 +108,8 @@ end
 ---@param drugName string
 ---@param price number
 ---@param amount number
-lib.callback.register('prp-drugsales:sell', function(source, drugName, price, amount)
+---@param netId number
+lib.callback.register('prp-drugsales:sell', function(source, drugName, price, amount, netId)
     local player = Framework.getPlayerFromId(source)
     local drug = Config.Drugs[drugName]
 
@@ -151,9 +163,9 @@ lib.callback.register('prp-drugsales:sell', function(source, drugName, price, am
     -- 10% is max to be addded to accept chance after clamp (0 - 10)
     local acceptChance = base + math.max(0, math.min(reputation.current, 10))
 
-    if math.random(1, 100) > acceptChance then
+    if math.random(1, 100) <= acceptChance then
         addPlayerRep(player, -reputation.remove)
-        refuseDeal(player, drugName, amount)
+        refuseDeal(source, netId, { name = drugName, amount = amount })
 
         -- Dispatch police
         if math.random(1, 100) < dispatchChance then

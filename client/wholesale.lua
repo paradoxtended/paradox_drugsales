@@ -175,6 +175,7 @@ local function itemUsed(items)
     end)
 
     local success = Citizen.Await(p)
+    local netId = NetworkGetNetworkIdFromEntity(currentClient)
     
     while success == 'negotiate' and attempt < Config.Wholesale.client.attempts do
         if not Config.ProgressBar(locale('renegotiating_deal'), 8000, true, {
@@ -189,11 +190,10 @@ local function itemUsed(items)
         lib.playAnim(cache.ped, 'timetable@amanda@ig_2', 'ig_2_base_amanda', 3.0, 3.0, -1, 11)
         attempt += 1
 
-        local items = lib.callback.await('prp_drugsales:finish', false, success)
+        local items = lib.callback.await('prp_drugsales:finish', false, success, netId)
         success = waitForHustle(items, attempt < Config.Wholesale.client.attempts)
     end
 
-    local netId = NetworkGetNetworkIdFromEntity(currentClient)
     local success = lib.callback.await('prp_drugsales:finish', false, success, netId)
 
     if success then

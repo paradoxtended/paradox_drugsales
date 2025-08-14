@@ -8,20 +8,6 @@ lib.callback.register('prp-drugsales:currentZone', function()
     return currentZone
 end)
 
-local function removeZones()
-    for _, blip in ipairs(blips) do
-        RemoveBlip(blip.normal)
-        RemoveBlip(blip.radius)
-    end
-
-    for _, zone in ipairs(zones) do
-        zone:remove()
-    end
-
-    table.wipe(blips)
-    table.wipe(zones)
-end
-
 local function createZones()
     for index, data in pairs(Config.SellingZones) do
         local radius = data.radius or Config.DefaultRadius
@@ -123,7 +109,7 @@ local function sellDrug(drugName, price, amount)
     local progress = Config.ProgressBar(locale('giving_offer'), 3500, true, { clip = 'youthinkyourhappy_7', dict = 'special_ped@jerome@monologue_6@monologue_6h' })
 
     if progress then
-        local sold = lib.callback.await('prp-drugsales:sell', false, drugName, price, amount)
+        local sold = lib.callback.await('prp-drugsales:sell', false, drugName, price, amount, NetworkGetNetworkIdFromEntity(currentNPC))
 
         if sold then
             Config.Notify(locale('deal_success'), 'success')
@@ -229,45 +215,13 @@ lib.callback.register('prp-drugsales:animation', function(drugName)
     return success
 end)
 
-local function attackPlayer()
-    Config.Notify(locale('client_attacked'), 'inform')
-
-    SetPedCombatAttributes(currentNPC, 46, true)
-    SetPedFleeAttributes(currentNPC, 0, false)
-    SetPedRelationshipGroupHash(currentNPC, GetHashKey('AGGRESSIVE'))
-    SetRelationshipBetweenGroups(5, GetHashKey('PLAYER'), GetHashKey('AGGRESSIVE'))
-    SetRelationshipBetweenGroups(5, GetHashKey('AGGRESSIVE'), GetHashKey('PLAYER'))
-    TaskCombatPed(currentNPC, cache.ped, 0, 16)
-    SetPedKeepTask(currentNPC, true)
-
-    currentNPC = nil
-end
-
----@param drugName string
----@param amount number
-local function robPlayer(drugName, amount)
-    Config.Notify(locale('client_stole'), 'inform')
-
-    TaskSmartFleePed(currentNPC, cache.ped, 50.0, -1, true, true)
-
-    local netId = NetworkGetNetworkIdFromEntity(currentNPC)
-    TriggerServerEvent('prp_drugsales:registerRobbery', netId, drugName, amount)
-
-    currentNPC = nil
-end
-
-RegisterNetEvent('prp_drugsales:attackPlayer', attackPlayer)
-RegisterNetEvent('prp_drugsales:robPlayer', robPlayer)
-
-RegisterNetEvent('prp_drugsales:robbedPlayer', function(netId)
+RegisterNetEvent('prp_drugsales:registerRobbery', function(netId)
     exports.ox_target:addEntity(netId, {
         label = locale('take_drugs'),
         icon = 'fa-solid fa-hand',
-        name = 'prp_drugsales:robbedPlayer',
-        canInteract = function(entity, distance)
-            return IsEntityDead(entity)
-            and distance <= 2.0
-            and not prp.progressActive()
+        distance = 2,
+        canInteract = function(entity)
+            return IsPedDeadOrDying(entity, false) and not prp.progressActive()
         end,
         onSelect = function()
             if not Config.ProgressBar(locale('searching_drugs'), 5000, true, {
@@ -276,7 +230,7 @@ RegisterNetEvent('prp_drugsales:robbedPlayer', function(netId)
                 flag = 1
             }) then return end
 
-            local success = lib.callback.await('prp_drugsales:takeDrugs', false, netId)
+            local success = lib.callback.await('prp_drugsales:robbery', false, netId)
 
             if success then
                 Config.Notify(locale('drugs_took'), 'inform')
@@ -286,5 +240,8 @@ RegisterNetEvent('prp_drugsales:robbedPlayer', function(netId)
 end)
 
 RegisterNetEvent('prp_drugsales:unregisterRobbery', function(netId)
-    exports.ox_target:removeEntity(netId, 'prp_drugsales:robbedPlayer')
+    exports.ox_target:removeEntity(netId)
 end)
+
+RegisterNetEvent('prp_drugsales:attack', Utils.attackPlayer)
+RegisterNetEvent('prp_drugsales:rob', Utils.robPlayer)

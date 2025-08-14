@@ -53,14 +53,19 @@ lib.callback.register('prp_drugsales:finish', function(source, type, netId)
     local data = Config.Wholesale.wholesaleZones[currentZone.index]
     local drugsList = currentZone and Config.Wholesale.wholesaleZones[currentZone.index]?.drugsList or Utils.getAllDrugs()
 
-    if netId then
-        local entity = NetworkGetEntityFromNetworkId(netId)
-        
-        if entity then
-            SetTimeout(10000, function()
-                DeleteEntity(entity)
-            end)
+    if math.random(100) <= (data.failChance or Config.DefaultFail) and type ~= 'negotiate' then
+        local random = math.random(100)
+
+        if random < 50 then
+            TriggerClientEvent('prp_drugsales:attack', source, netId)
+        else
+            TriggerClientEvent('prp_drugsales:rob', source, netId, pending[source])
         end
+
+        pending[source] = nil
+        busy[source] = nil
+
+        return
     end
 
     if type == 'negotiate' then
@@ -68,6 +73,14 @@ lib.callback.register('prp_drugsales:finish', function(source, type, netId)
     end
 
     if type == 'confirmed' and pending[source] then
+        local entity = NetworkGetEntityFromNetworkId(netId)
+        
+        if entity then
+            SetTimeout(10000, function()
+                DeleteEntity(entity)
+            end)
+        end
+
         local items = pending[source]
         ---@type { items: { name: string, amount: number }[], reputation: number, message: string[], total: number }
         local store = { items = {}, message = {}, reputation = 0, total = 0 }

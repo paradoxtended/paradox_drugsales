@@ -12,6 +12,8 @@ Config = {}
 ---| 'black_money'
 ---| 'bank'
 
+-- Default fail chance, used when deal ends unsuccessfully and in wholesale
+Config.DefaultFail = 30
 ---Default reputation ... if reputation is not defined in drug properties (0.01 rep will be added if deal ends successfully otherwise you'll lose 0.01)
 Config.DefaultRep = 0.01
 --- Default radius ... if radius is not defined in selling zone
@@ -119,6 +121,7 @@ Config.SellingZones = {
 ---@field drugsList string[]?
 ---@field divisor number The total reward and reputation gets divided by this value
 ---@field dispatchChance number?
+---@field failChance number?
 
 ---@class Wholesale
 ---@field disabled boolean? If set to true then it won't be possible to sell wholesale ...

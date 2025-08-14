@@ -19,5 +19,8 @@
     "posted_announcement": "Du hast eine Anzeige geschaltet. Warte, bis sich Kunden bei dir melden.",
     "not_in_zone": "Du befindest dich nicht in der Großhandelszone.",
     "found_client": "Ein Kunde hat auf deine Anzeige geantwortet. Warte auf ihn.",
-    "client_died": "Dein Kunde ist gestorben."
+    "client_died": "Dein Kunde ist gestorben.",
+    "introducing_yourself": "Ich stelle mich vor...",
+    "renegotiating_deal": "Verhandlung des Geschäfts erneut...",
+    "webhook_wholesale_sold": "Verkauft %s für insgesamt $%s. Verkauft an (Koordinaten): %s"
 }

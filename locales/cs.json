@@ -19,5 +19,8 @@
     "posted_announcement": "Zveřejnil jsi inzerát. Počkej, až se ti ozvou zákazníci.",
     "not_in_zone": "Nejsi v zóně pro velkoobchod.",
     "found_client": "Na tvůj inzerát odpověděl zákazník. Počkej na něj.",
-    "client_died": "Tvůj zákazník zemřel."
+    "client_died": "Tvůj zákazník zemřel.",
+    "introducing_yourself": "Představuji se...",
+    "renegotiating_deal": "Znovu vyjednávám dohodu...",
+    "webhook_wholesale_sold": "Prodáno %s za celkovou cenu $%s. Prodáno na (souřadnice): %s"
 }

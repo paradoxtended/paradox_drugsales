@@ -45,6 +45,37 @@ function Utils.hasDrug()
     return false
 end
 
+---@param netId number Ped's netId
+function Utils.attackPlayer(netId)
+    local ped = NetworkGetEntityFromNetworkId(netId)
+
+    if not ped then return end
+
+    Config.Notify(locale('client_attacked'), 'inform')
+
+    SetPedCombatAttributes(ped, 46, true)
+    SetPedFleeAttributes(ped, 0, false)
+    SetPedRelationshipGroupHash(ped, GetHashKey('AGGRESSIVE'))
+    SetRelationshipBetweenGroups(5, GetHashKey('PLAYER'), GetHashKey('AGGRESSIVE'))
+    SetRelationshipBetweenGroups(5, GetHashKey('AGGRESSIVE'), GetHashKey('PLAYER'))
+    TaskCombatPed(ped, cache.ped, 0, 16)
+    SetPedKeepTask(ped, true)
+end
+
+---@param netId number Ped's netId
+---@param items { name: string, amount: number }[]
+function Utils.robPlayer(netId, items)
+    local ped = NetworkGetEntityFromNetworkId(netId)
+
+    if not ped then return end
+
+    Config.Notify(locale('client_stole'), 'inform')
+
+    TaskSmartFleePed(ped, cache.ped, 50.0, -1, true, true)
+
+    TriggerServerEvent('prp_drugsales:rob', netId, items)
+end
+
 ---Create normal blip for coords
 ---@param coords vector3 | vector4
 ---@param data BlipData
