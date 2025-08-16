@@ -13,12 +13,35 @@ debugData([
   {
     action: 'leaderboard',
     data: {
-      player: { imageUrl: 'https://i.postimg.cc/Mpg8Mb2K/walterwhite-wide-24664a3dc903dff3bf3fe17a27996d6a174ee50b.jpg', nickname: 'Walter' },
       users: [
-        { name: 'Esteban Casados', nickname: 'Walter', imageUrl: 'https://i.postimg.cc/Mpg8Mb2K/walterwhite-wide-24664a3dc903dff3bf3fe17a27996d6a174ee50b.jpg', stats: { earned: 487541, drugsSold: 184, mostSellable: 'Meth Syringe, Meth Bag, Meth' } },
-        { name: 'Karel Petricek', nickname: 'Karel', imageUrl: 'https://i.postimg.cc/BQ08mBGj/Sunset-in-Grace-Bay-Turks-and-Caicos-Islands-scaled.jpg', stats: { earned: 165425, drugsSold: 90, mostSellable: 'Coke Bag' } },
-        { name: 'Jessie Pinkman', nickname: 'Jessie', imageUrl: 'https://i.postimg.cc/x1HN5pXN/Jesse-Pinkman-S5-B.png', stats: { earned: 178548, drugsSold: 85, mostSellable: 'Meth Bag, Coke Brick, Coke' } },
-        { name: 'Gustavo Fring', nickname: 'Gus', imageUrl: 'https://i.postimg.cc/8zHJxJbT/Season-4-Gus.jpg', stats: { earned: 1847548, drugsSold: 1548, mostSellable: 'Meth Bag' } }
+        {
+          name: 'Enzo Favara',
+          nickname: 'Enzoo',
+          imageUrl: 'https://i.postimg.cc/8CCKvsRZ/Enzo-Favara.jpg',
+          stats: {
+            earned: 578421,
+            lastActive: '08/16/2025, 03:27:45 PM'
+          },
+          drugs: {
+            meth_bag: { label: 'Meth Bag', amount: 48 },
+            coke_bag: { label: 'Coke Bag', amount: 75 },
+            meth_syringe: { label: 'Meth Syringe', amount: 92 }
+          },
+          myself: true
+        },
+        {
+          name: 'Esteban Casados',
+          nickname: 'Esteee',
+          imageUrl: 'https://i.postimg.cc/BQ08mBGj/Sunset-in-Grace-Bay-Turks-and-Caicos-Islands-scaled.jpg',
+          stats: {
+            earned: 184752,
+            lastActive: '08/14/2025, 02:27:48 PM'
+          },
+          drugs: {
+            weed_joint: { label: 'Weed Joint', amount: 41 },
+            weed_bag: { label: 'Weed Bag', amount: 94 }
+          }
+        }
       ],
       admin: true
     }

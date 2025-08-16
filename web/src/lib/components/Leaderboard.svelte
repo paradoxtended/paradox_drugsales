@@ -1,168 +1,167 @@
 <script lang="ts">
 import { dataState, NuiState, nuiState } from "$lib/utils";
-import { scale, slide } from "svelte/transition";
+import { linear } from "svelte/easing";
+import { fade } from "svelte/transition";
 
 interface User {
     name: string;
     nickname: string;
     imageUrl?: string;
     stats: { 
-        earned: number; 
-        drugsSold: number; 
-        mostSellable: string;
-    }
+        earned: number;
+        lastActive: string;
+    },
+    drugs: Record<string, { label: string, amount: number }>;
+    myself?: boolean;
 }
 
 interface LeaderboardProps {
-    player: User;
     users: User[];
     admin?: boolean;
 }
 
 let data: LeaderboardProps = $state($dataState as unknown as LeaderboardProps);
-let settings: boolean = $state(false);
-let shownUsers: string[] = $state([]);
-
-let inputs: { nickname: string; imageUrl?: string } = $state({ nickname: data.player.nickname, imageUrl: data.player.imageUrl });
-let filtered: User[] = $state([]);
+let activeTab: 'PROFILE' | 'LEADERBOARD' = $state('LEADERBOARD');
+let users: User[] = $state([]);
 let query: string = $state('');
-let sort: 'earnings' | 'amount' = $state('earnings');
-let direction: 'asc' | 'desc' = $state('desc');
+let player: User = data.users.find(user => user?.myself) ?? data.users[0];
+let currentProfile: User | undefined = $state();
+
+let categoriesEl: HTMLElement | undefined = $state();
+let bgSliderEl: HTMLElement | undefined = $state();
+let sliderEl: HTMLElement | undefined = $state();
+
+function updateSlider() {
+    if (!categoriesEl || !bgSliderEl || !sliderEl) return;
+
+    const pEls = categoriesEl.querySelectorAll('p');
+    const activeEl = Array.from(pEls).find(el => el.classList.contains('active')) as HTMLElement;
+    if (!activeEl) return;
+
+    const rect = activeEl.getBoundingClientRect();
+    const containerRect = categoriesEl.getBoundingClientRect();
+
+    const width = rect.width;
+    const offsetLeft = rect.left - containerRect.left;
+
+    bgSliderEl.style.width = width + 'px';
+    bgSliderEl.style.transform = `translateX(${offsetLeft}px)`;
+
+    sliderEl.style.width = width + 'px';
+    sliderEl.style.transform = `translateX(${offsetLeft}px)`;
+}
 
 $effect(() => {
-    filtered = data.users
-        .filter(user => user.nickname.toLowerCase().includes(query.toLowerCase()) || data.admin && user.name.toLowerCase().includes(query.toLowerCase()))
-        .sort((a, b) => {
-            if (sort === 'earnings')
-                return direction === 'desc' ? b.stats.earned - a.stats.earned : a.stats.earned - b.stats.earned
-            else if (sort === 'amount')
-                return direction === 'desc' ? b.stats.drugsSold - a.stats.drugsSold : a.stats.drugsSold - b.stats.drugsSold
-            else
-                return 0
-        })
-})
-
-function showSettings(changed?: boolean) {
-    settings = !settings;
-
-    if (changed) {
-        // fetch nui
+    if (activeTab) {
+        updateSlider();
     }
 
-    inputs = { nickname: data.player.nickname, imageUrl: data.player.imageUrl };
+    users = data.users
+        .filter(user =>
+            user.nickname.toLowerCase().includes(query.toLowerCase()) ||
+            user.name.toLowerCase().includes(query.toLowerCase()) && data.admin)
+        .sort((a, b) => b.stats.earned - a.stats.earned)
+});
+
+function getDrugs(drugs: Record<string, { label: string, amount: number }>) {
+    const allDrugs = Object.values(drugs);
+    const sorted = allDrugs.sort((a, b) => b.amount - a.amount);
+
+    return sorted.slice(0, 3).map(drug => drug.label).join(', ')
 }
+
+function openProfile(user?: User) {
+    const profile = user || player;
+    
+    if (profile === null) return;
+
+    activeTab = 'PROFILE';
+    currentProfile = profile;
+}
+
 </script>
 
 {#if $nuiState === NuiState.Leaderboard}
-    <div class="leaderboard-container">
-        <div class="leaderboard-wrapper p-5 pl-0 pr-0" style="pointer-events: {settings && 'none'};">
-            <div class="flex items-center justify-between pr-5 pl-5">
-                <div>
-                    <p class="text-white text-2xl">Drug Dealers</p>
-                    <p class="text-neutral-500 font-[Inter] text-sm">Take a look at dealers of this city</p>
-                </div>
-                <div class="text-white flex items-center gap-3">
-                    <p class="text-lg">Welcome, <span class="font-bold text-lime-500 text-xl">{data.player.nickname}</span></p>
-                    <div class="outline outline-2 rounded-full outline-offset-2 group cursor-pointer relative" onclick={() => showSettings()}>
-                        <img src={data.player.imageUrl} onerror={(e: any) => { e.target.src = 'https://i.postimg.cc/nrJ96vNc/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector.jpg' }} alt="user-profile"
-                        class="rounded-full w-[50px] h-[50px] group-hover:opacity-50 transition-all">
-                        <i class="hgi hgi-stroke hgi-edit-02 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white opacity-0 group-hover:opacity-100 transition-all
-                        pointer-events-none"></i>
-                    </div>
-                </div>
+    <div class="lb-container" transition:fade|global>
+        <!-- Main tab (header) -->
+        <div class="flex items-center justify-between">
+            <div class="lb-title-container">
+                <p class="text-[#2dd4bf] font-medium text-xl drop-shadow-[0_0_10px_#2dd4bf] leading-6">Drug Dealers</p>
+                <p class="text-sm text-gray-400">Find dealers</p>
             </div>
-            <div class="mt-3 relative pr-5 pl-5">
-                <input type="text" placeholder="Search..."
-                class="bg-transparent placeholder:text-neutral-500 text-white font-[Inter] text-sm border border-neutral-700 rounded-md px-2 py-1 w-full
-                focus:outline focus:outline-1 focus:outline-offset-1 focus:outline-neutral-300"
-                bind:value={query}>
-                <i class="hgi hgi-stroke hgi-search-01 text-neutral-500 absolute top-1/2 right-5 -translate-x-1/2 -translate-y-1/2 pointer-events-none"></i>
+            <div class="flex items-center relative" bind:this={categoriesEl}>
+                <p class="lb-category" class:active={activeTab === 'LEADERBOARD'} onclick={() => activeTab = 'LEADERBOARD'}>LEADERBOARD</p>
+                <p class="lb-category" class:active={activeTab === 'PROFILE'} onclick={() => openProfile()}>PROFILE</p>
+                <div class="lb-category-bg-slider" bind:this={bgSliderEl}></div>
+                <div class="lb-category-slider" bind:this={sliderEl}></div>
             </div>
-
-            <div class="mx-5 mt-3 flex items-center justify-between">
-                <div class="flex items-center gap-1">
-                    <button onclick={() => sort = 'earnings'} class="flex items-center gap-2 rounded-full px-3 border duration-300 {sort === 'earnings' ? 'bg-lime-500/20 border-lime-500' : 'bg-white/5 border-neutral-600'}"><i class="hgi hgi-stroke hgi-dollar-circle"></i> Earnings</button>
-                    <button onclick={() => sort = 'amount'} class="flex items-center gap-2 rounded-full px-3 border duration-300 {sort === 'amount' ? 'bg-lime-500/20 border-lime-500' : 'bg-white/5 border-neutral-600'}"><i class="hgi hgi-stroke hgi-package"></i> Amount</button>
-                </div>
-
-                <div class="flex items-center gap-1">
-                    <button onclick={() => direction = 'desc'} class="flex items-center gap-2 rounded-full px-3 border duration-300 {direction === 'desc' ? 'bg-lime-500/20 border-lime-500' : 'bg-white/5 border-neutral-600'}"><i class="hgi hgi-stroke hgi-sort-by-down-02"></i> Descending</button>
-                    <button onclick={() => direction = 'asc'} class="flex items-center gap-2 rounded-full px-3 border duration-300 {direction === 'asc' ? 'bg-lime-500/20 border-lime-500' : 'bg-white/5 border-neutral-600'}"><i class="hgi hgi-stroke hgi-sort-by-up-02"></i> Ascending</button>
-                </div>
+            <div class="relative">
+                <input type="text" placeholder="Search" class="lb-input-search" bind:value={query}>
+                <i class="hgi hgi-stroke hgi-search-01 text-[#adadad] absolute top-1/2 -translate-y-1/2 right-3 text-sm pointer-events-none"></i>
             </div>
-
-            {#if filtered.length === 0}
-                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-lg flex items-center gap-3">
-                    <i class="hgi hgi-stroke hgi-user-question-02 text-3xl"></i>
-                    <p class="font-[Inter]">No user found.</p>
-                </div>
-            {:else}
-                <div class="h-[340px] mr-2.5 pt-3 pr-2.5 pl-5 grid grid-cols-3 place-content-start gap-2 overflow-auto">
-                    {#each filtered as user, id}
-                        <div class="bg-black/50 py-2 px-5 rounded-lg h-fit relative">
-                            <div class="cursor-pointer" onclick={() => { if (shownUsers.includes(user.nickname)) shownUsers = shownUsers.filter(nickname => nickname !== user.nickname); else shownUsers.push(user.nickname) }}>
-                                <p class="absolute -top-1 -left-1 bg-lime-500/50 rounded-full px-2">{id + 1}</p>
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center gap-3">
-                                        <img src={user.imageUrl} onerror={(e: any) => { e.target.src = 'https://i.postimg.cc/nrJ96vNc/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector.jpg' }} alt="user-profile"
-                                        class="rounded-full w-[50px] h-[50px] group-hover:opacity-50 transition-all">
-                                        <div>
-                                            <p class="text-lg">{user.nickname}</p>
-                                            <p class="text-neutral-500">{data.admin && user.name}</p>
-                                        </div>
-                                    </div>
-                                    <i class="fa-solid fa-chevron-down text-sm duration-300 {shownUsers.includes(user.nickname) && 'rotate-180'}"></i>
-                                </div>
-                            </div>
-                            {#if shownUsers.includes(user.nickname)}
-                                <div transition:slide class="font-[Inter] mt-2 flex flex-col gap-2">
-                                    <p class="font-[Oswald] text-lg font-medium">User stats</p>
-                                    <div class="text-sm">
-                                        <p>Earnings</p>
-                                        <p class="text-lime-500 font-medium">${user.stats.earned.toLocaleString('en-US')}</p>
-                                    </div>
-                                    <div class="text-sm">
-                                        <p>Total drugs sold</p>
-                                        <p class="text-lime-500 font-medium">{user.stats.drugsSold.toLocaleString('en-US')}</p>
-                                    </div>
-                                    <div class="text-sm">
-                                        <p>Most sellable drugs</p>
-                                        <p class="text-lime-500 font-medium">{user.stats.mostSellable}</p>
-                                    </div>
-                                </div>
-                            {/if}
-                        </div>
-                    {/each}
-                </div>
-            {/if}
-
-            {#if settings}
-                <div class="leaderboard-settings" transition:scale>
-                    <span></span>
-                    <p class="text-xl">Change account settings</p>
-                    <p class="text-neutral-500 text-sm font-[Inter]">Change your dealer's account settings</p>
-                    <div class="my-3 flex items-center gap-3 w-full">
-                        <div class="w-full flex flex-col gap-1">
-                            <p class="text-[17px]">Change nickname</p>
-                            <input type="text" class="bg-white/5 font-[Inter] text-[15px] w-full px-2 py-1 border border-neutral-700 rounded-md
-                            focus:outline focus:outline-1 focus:outline-offset-1 focus:outline-neutral-300"
-                            bind:value={inputs.nickname as unknown as string}>
-                            <p class="text-sm font-[Inter] text-neutral-500">Your new nickname.</p>
-                        </div>
-                        <div class="w-full flex flex-col gap-1">
-                            <p class="text-[17px]">Change profile picture</p>
-                            <input type="text" class="bg-white/5 font-[Inter] text-[15px] w-full px-2 py-1 border border-neutral-700 rounded-md
-                            focus:outline focus:outline-1 focus:outline-offset-1 focus:outline-neutral-300"
-                            bind:value={inputs.imageUrl as unknown as string}>
-                            <p class="text-sm font-[Inter] text-neutral-500">Your new profile picture.</p>
-                        </div>
-                    </div>
-                    <div class="w-full flex items-center gap-3">
-                        <button class="bg-red-700/20 border border-red-700 rounded-full w-full py-0.5 hover:bg-red-700/30 duration-300" onclick={() => showSettings()}>Cancel</button>
-                        <button class="bg-lime-500/20 border border-lime-500 rounded-full w-full py-0.5 hover:bg-lime-500/30 duration-300" onclick={() => showSettings(true)}>Change</button>
-                    </div>
-                </div>
-            {/if}
+            <div class="flex items-center text-[13px] text-gray-400 bg-gray-500/30 p-[1px]">
+                <p class="bg-gray-800/50 px-2 py-0.5">Exit</p>
+                <p class="px-2 py-0.5">ESC</p>
+            </div>
         </div>
+
+        <div class="lb-divider after:-bottom-[9px] z-0"></div>
+
+        <!-- Leaderboard -->
+        {#if activeTab === 'LEADERBOARD'}
+            <div in:fade={{ duration: 300, easing: linear }}
+            class="mt-5 overflow-auto h-[400px] -mr-[15px] pr-[15px]">
+                <table class="w-full border-separate" style="border-spacing: 0 10px;">
+                    <thead>
+                        <tr class="text-[#9ca3af] text-sm bg-gradient-to-b from-neutral-500/0 to-[#4b556350]">
+                            <td class="text-center py-1.5">User</td>
+                            <td class="text-center py-1.5">Last active</td>
+                            <td class="text-center py-1.5">Most sellable drugs</td>
+                            <td class="text-center py-1.5">Earnings</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="4">
+                                <div class="lb-divider"></div>
+                            </td>
+                        </tr>
+                        {#each users as user}
+                            <tr class="text-sm text-white bg-[radial-gradient(#71717a75,_#374151a0)]">
+                                <td class="text-center p-2">
+                                    <div class="flex items-center gap-5">
+                                        <i class="fa-solid fa-user bg-gray-500/50 w-8 h-8 flex items-center justify-center rounded-sm duration-200
+                                        hover:bg-[#2dd4bf20] hover:text-[#2dd4bf] cursor-pointer"
+                                        onclick={() => openProfile(user)}></i>
+                                        <p>{user.nickname}</p>
+                                    </div>
+                                </td>
+                                <td class="text-center p-2">{user.stats.lastActive}</td>
+                                <td class="text-center p-2">{getDrugs(user.drugs)}</td>
+                                <td class="text-center p-2">{Intl.NumberFormat('en-US', { style: "currency", currency: 'USD', maximumFractionDigits: 0 }).format(user.stats.earned)}</td>
+                            </tr>
+                        {/each}
+                    </tbody>
+                </table>
+            </div>
+        {/if}
+
+        <!-- Profile -->
+        {#if activeTab === 'PROFILE' && currentProfile !== undefined}
+            <div in:fade={{ duration: 300, easing: linear }} class="mt-7">
+                <div class="flex items-center gap-3">
+                    <div class="relative w-[100px] h-[115px]">
+                        <!-- Hexagon border -->
+                        <div class="absolute inset-0 hexagon"></div>
+                        <!-- Image -->
+                        <img src={currentProfile.imageUrl} class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[92%] h-[92%]" style="clip-path: polygon(50% 0,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%); aspect-ratio: cos(30deg);" />
+                    </div>
+                    <div>
+                        <p class="text-white text-2xl leading-5">{currentProfile.nickname}</p>
+                        <p class="text-[15px] text-gray-400 font-light">Last active: {currentProfile.stats.lastActive}</p>
+                    </div>
+                </div>
+            </div>
+        {/if}
     </div>
 {/if}

@@ -15,12 +15,10 @@ export const closeNui = (result?: 'confirmed' | 'negotiate' | boolean, price?: n
     const wrapper = document.querySelector('.wrapper') as HTMLElement;
     const repWrapper = document.querySelector('.rep-wrapper') as HTMLElement;
     const wholesaleWrapper = document.querySelector('.hustle-container') as HTMLElement;
-    const leaderboardWrapper = document.querySelector('.leaderboard-container') as HTMLElement;
 
     if (wrapper) wrapper.style.animation = 'slideOut 300ms forwards';
     if (repWrapper) repWrapper.style.animation = 'repAnimOut 300ms forwards';
     if (wholesaleWrapper) wholesaleWrapper.style.animation = 'fadeOut 300ms forwards';
-    if (leaderboardWrapper) leaderboardWrapper.style.animation = 'fadeOut 300ms forwards';
 
     setTimeout(() => nuiState.set(NuiState.Closed), 300);
 
