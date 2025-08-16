@@ -13,11 +13,14 @@ debugData([
   {
     action: 'leaderboard',
     data: {
-      imageUrl: 'https://i.postimg.cc/Mpg8Mb2K/walterwhite-wide-24664a3dc903dff3bf3fe17a27996d6a174ee50b.jpg',
-      nickname: 'Walter',
+      player: { imageUrl: 'https://i.postimg.cc/Mpg8Mb2K/walterwhite-wide-24664a3dc903dff3bf3fe17a27996d6a174ee50b.jpg', nickname: 'Walter' },
       users: [
-        //{ name: 'Esteban Casados', nickname: 'Walter', imageUrl: 'https://i.postimg.cc/Mpg8Mb2K/walterwhite-wide-24664a3dc903dff3bf3fe17a27996d6a174ee50b.jpg', stats: { earned: 487541, drugsSold: 184, mostSellable: 'Meth Syringe, Meth Bag' } },
-      ]
+        { name: 'Esteban Casados', nickname: 'Walter', imageUrl: 'https://i.postimg.cc/Mpg8Mb2K/walterwhite-wide-24664a3dc903dff3bf3fe17a27996d6a174ee50b.jpg', stats: { earned: 487541, drugsSold: 184, mostSellable: 'Meth Syringe, Meth Bag, Meth' } },
+        { name: 'Karel Petricek', nickname: 'Karel', imageUrl: 'https://i.postimg.cc/BQ08mBGj/Sunset-in-Grace-Bay-Turks-and-Caicos-Islands-scaled.jpg', stats: { earned: 165425, drugsSold: 90, mostSellable: 'Coke Bag' } },
+        { name: 'Jessie Pinkman', nickname: 'Jessie', imageUrl: 'https://i.postimg.cc/x1HN5pXN/Jesse-Pinkman-S5-B.png', stats: { earned: 178548, drugsSold: 85, mostSellable: 'Meth Bag, Coke Brick, Coke' } },
+        { name: 'Gustavo Fring', nickname: 'Gus', imageUrl: 'https://i.postimg.cc/8zHJxJbT/Season-4-Gus.jpg', stats: { earned: 1847548, drugsSold: 1548, mostSellable: 'Meth Bag' } }
+      ],
+      admin: true
     }
   }
 ])

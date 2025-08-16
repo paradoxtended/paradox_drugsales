@@ -142,5 +142,80 @@ body {
   background: radial-gradient(circle, rgba(0,255,0,0.2) 0%, transparent 90%);
   filter: blur(100px);
   pointer-events: none;
-  z-index: 0;
+  z-index: -1;
+}
+
+.leaderboard-settings {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 500px;
+  pointer-events: all;
+  outline: solid #a8a8a850 1px;
+  padding: 15px;
+  background: linear-gradient(#080808f9);
+  color: #ffffff;
+}
+
+.leaderboard-settings::before,
+.leaderboard-settings::after {
+  content: "";
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  border: 3px solid #a8a8a8;
+}
+
+/* Left up */
+.leaderboard-settings::before {
+  top: -2px;
+  left: -2px;
+  border-right: none;
+  border-bottom: none;
+}
+
+/* Left right */
+.leaderboard-settings::after {
+  top: -2px;
+  right: -2px;
+  border-left: none;
+  border-bottom: none;
+}
+
+/* Bottom corners */
+.leaderboard-settings span::before,
+.leaderboard-settings span::after {
+  content: "";
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  border: 3px solid #a8a8a8;
+}
+
+/* Left down */
+.leaderboard-settings span::before {
+  bottom: -2px;
+  left: -2px;
+  border-right: none;
+  border-top: none;
+}
+
+/* Left down */
+.leaderboard-settings span::after {
+  bottom: -2px;
+  right: -2px;
+  border-left: none;
+  border-top: none;
+}
+
+::-webkit-scrollbar {
+  width: 2px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #84cc16;
+}
+
+::-webkit-scrollbar-track {
+  background: #00000050;
 }
