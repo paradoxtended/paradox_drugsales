@@ -15,6 +15,20 @@ debugData([
     data: {
       users: [
         {
+          name: 'Esteban Casados',
+          nickname: 'Esteee',
+          imageUrl: 'https://i.postimg.cc/BQ08mBGj/Sunset-in-Grace-Bay-Turks-and-Caicos-Islands-scaled.jpg',
+          stats: {
+            earned: 184752,
+            lastActive: '08/14/2025, 02:27:48 PM',
+            reputation: 12.4516
+          },
+          drugs: {
+            weed_joint: { label: 'Weed Joint', amount: 41 },
+            weed_bag: { label: 'Weed Bag', amount: 94 }
+          }
+        },
+        {
           name: 'Enzo Favara',
           nickname: 'Enzoo',
           imageUrl: 'https://i.postimg.cc/8CCKvsRZ/Enzo-Favara.jpg',
@@ -44,7 +58,55 @@ debugData([
             weed_joint: { label: 'Weed Joint', amount: 41 },
             weed_bag: { label: 'Weed Bag', amount: 94 }
           }
-        }
+        },
+        {
+          name: 'Enzo Favara',
+          nickname: 'Enzoo',
+          imageUrl: 'https://i.postimg.cc/8CCKvsRZ/Enzo-Favara.jpg',
+          stats: {
+            earned: 688421,
+            lastActive: '08/16/2025, 03:27:45 PM',
+            reputation: 24.564
+          },
+          drugs: {
+            meth_bag: { label: 'Meth Bag', amount: 48 },
+            coke_bag: { label: 'Coke Bag', amount: 75 },
+            meth_syringe: { label: 'Meth Syringe', amount: 92 },
+            coke_brick: { label: 'Coke Brick', amount: 150 }
+          },
+          myself: true
+        },
+        {
+          name: 'Esteban Casados',
+          nickname: 'Esteee',
+          imageUrl: 'https://i.postimg.cc/BQ08mBGj/Sunset-in-Grace-Bay-Turks-and-Caicos-Islands-scaled.jpg',
+          stats: {
+            earned: 184752,
+            lastActive: '08/14/2025, 02:27:48 PM',
+            reputation: 12.4516
+          },
+          drugs: {
+            weed_joint: { label: 'Weed Joint', amount: 41 },
+            weed_bag: { label: 'Weed Bag', amount: 94 }
+          }
+        },
+        {
+          name: 'Enzo Favara',
+          nickname: 'Enzoo',
+          imageUrl: 'https://i.postimg.cc/8CCKvsRZ/Enzo-Favara.jpg',
+          stats: {
+            earned: 688421,
+            lastActive: '08/16/2025, 03:27:45 PM',
+            reputation: 24.564
+          },
+          drugs: {
+            meth_bag: { label: 'Meth Bag', amount: 48 },
+            coke_bag: { label: 'Coke Bag', amount: 75 },
+            meth_syringe: { label: 'Meth Syringe', amount: 92 },
+            coke_brick: { label: 'Coke Brick', amount: 150 }
+          },
+          myself: true
+        },
       ],
       admin: true
     }
