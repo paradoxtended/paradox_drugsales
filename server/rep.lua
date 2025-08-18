@@ -65,16 +65,12 @@ local function createPlayer(identifier)
         name = player:getFirstName() .. ' ' .. player:getLastName(),
         nickname = GetPlayerName(player.source),
         imageUrl = 'https://i.postimg.cc/nrJ96vNc/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector.jpg', -- Default pfp
-        stats = { earned = 0, lastActive = os.date("%m/%d/%Y, %I:%M:%S %p", os.time()), reputation = reps[identifier] },
-        drugs = (function()
-            local drugs = {}
-            for drugName, _ in pairs(Config.Drugs) do
-                drugs[drugName] = { label = Utils.getItemLabel(drugName), amount = 0 }
-            end
-            return drugs
-        end)(),
+        stats = { earned = 0, lastActive = os.date("%m/%d/%Y, %I:%M:%S %p", os.time()) },
+        ---@diagnostic disable-next-line: assign-type-mismatch
+        drugs = {},
     }
 
+    addPlayerLeaderboard(identifier, jsonData)
     MySQL.insert.await('INSERT INTO prp_drugsales (identifier, reputation, data) VALUES (?, ?, ?)', { identifier, reps[identifier], json.encode(jsonData) })
 end
 
@@ -101,7 +97,6 @@ function addPlayerRep(player, amount)
     reps[identifier] += amount
 
     local user = getDealerUser(player)
-    user.stats.reputation += amount
     user.stats.lastActive = os.date("%m/%d/%Y, %I:%M:%S %p", os.time())
 
     TriggerClientEvent('prp_drugsales:updateReputation', player.source, reps[identifier])

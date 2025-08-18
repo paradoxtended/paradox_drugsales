@@ -71,7 +71,7 @@ body {
   filter: drop-shadow(0 0 5px #84cc16);
 }
 
-.hustle-container {
+.hustle-container, .lb-background {
   width: 100%; height: 100%;
   opacity: 1;
   background: radial-gradient(#00000000, #000000);
@@ -139,31 +139,30 @@ body {
 
 .lb-table {
   width: 100%;
-  background: linear-gradient(#0a0a0aa0, #17171750);
-  border-radius: 5px;
-}
-
-.lb-table thead tr {
-  border-bottom: solid #404040a0 1px;
 }
 
 .lb-table thead tr td {
   text-align: center;
   padding: 3px 5px;
+  font-size: 14px;
+}
+
+.lb-table tbody {
+  background: linear-gradient(#0a0a0aa0, #17171750);
 }
 
 .lb-table tbody tr td {
   text-align: center;
-  padding: 5px 5px;
+  padding: 5px 10px;
   font-size: 15px;
 }
 
 .lb-table tbody tr:not(:last-child) {
-  border-bottom: solid #404040a0 1px;
+  border-bottom: solid #5e5e5ea0 1px;
 }
 
 .lb-table tbody tr:not(.empty):hover {
-  background: linear-gradient(#0a0a0aa0, #17171750);
+  background: #ffffff10;
   cursor: pointer;
 }
 
@@ -187,4 +186,36 @@ body {
 .lb-pagination button:enabled:hover {
   background-color: #84cc1620;
   border: solid #84cc16 1px;
+}
+
+.lb-profile-picture {
+  width: fit-content;
+  height: 125px; width: 125px;
+  border-radius: 100%;
+  padding: 3px;
+  position: relative;
+  cursor: pointer;
+}
+
+.lb-profile-position {
+  position: absolute;
+  top: 15px; left: 10px;
+  transform: translate(-50%, -50%) rotate(-15deg);
+  display: flex;
+  align-items: flex-end;
+  pointer-events: none;
+}
+
+.loader {
+  border: 3px solid #84cc1650;
+  border-top: 3px solid #84cc16;
+  border-radius: 50%;
+  width: 17px;
+  height: 17px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
