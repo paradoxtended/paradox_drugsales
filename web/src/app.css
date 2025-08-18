@@ -48,37 +48,8 @@ body {
   user-select: none;
 }
 
-@keyframes slideIn {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, 100%);
-  }
-}
-
-@keyframes slideOut {
-  100% {
-    opacity: 0;
-    transform: translate(-50%, 100%);
-  }
-}
-
 .wrapper {
   background: radial-gradient(#000000a0, #00000000 65%);
-  animation: slideIn 250ms forwards;
-}
-
-@keyframes repAnimIn {
-  0% {
-    opacity: 0;
-    transform: translateX(-100%);
-  }
-}
-
-@keyframes repAnimOut {
-  100% {
-    opacity: 0;
-    transform: translateX(-100%);
-  }
 }
 
 .rep-wrapper {
@@ -89,7 +60,6 @@ body {
   top: 3%; left: 2%;
   color: #ffffff;
   font-size: 17px;
-  animation: repAnimIn 250ms forwards;
   z-index: 1;
 }
 
@@ -101,24 +71,11 @@ body {
   filter: drop-shadow(0 0 5px #84cc16);
 }
 
-@keyframes fadeIn {
-  0% {
-    opacity: 0;
-  }
-}
-
-@keyframes fadeOut {
-  100% {
-    opacity: 0;
-  }
-}
-
 .hustle-container {
   width: 100%; height: 100%;
   opacity: 1;
   background: radial-gradient(#00000000, #000000);
   transition: all linear 300ms;
-  animation: fadeIn 300ms forwards;
 }
 
 .lb-container {
@@ -238,21 +195,4 @@ body {
 
 ::-webkit-scrollbar-track {
   background-color: #9ca3af30;
-}
-
-.hexagon {
-  --b: 1px; /* adjust to control the border  */
-  width: 100%; height: 100%;
-  aspect-ratio: cos(30deg);
-  top: 0; left: 0;
-  clip-path: 
-    polygon(50% 0,-50% 50%,50% 100%,150% 50%,50% 0,
-    50% var(--b),
-    calc(100% - var(--b)*sin(60deg)) calc(25% + var(--b)*cos(60deg)),
-    calc(100% - var(--b)*sin(60deg)) calc(75% - var(--b)*cos(60deg)),
-    50% calc(100% - var(--b)),
-    calc(var(--b)*sin(60deg)) calc(75% - var(--b)*cos(60deg)),
-    calc(var(--b)*sin(60deg)) calc(25% + var(--b)*cos(60deg)),
-    50% var(--b));
-  background: #2dd4bf;
 }

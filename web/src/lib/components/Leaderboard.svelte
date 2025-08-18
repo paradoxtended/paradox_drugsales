@@ -1,15 +1,18 @@
 <script lang="ts">
 import { dataState, NuiState, nuiState } from "$lib/utils";
+import { fetchNui } from "$lib/utils/fetchNui";
 import { linear } from "svelte/easing";
-import { fade } from "svelte/transition";
+import { fade, slide } from "svelte/transition";
 
 interface User {
+    identifier: string;
     name: string;
     nickname: string;
     imageUrl?: string;
     stats: { 
         earned: number;
         lastActive: string;
+        reputation: number;
     },
     drugs: Record<string, { label: string, amount: number }>;
     myself?: boolean;
@@ -26,6 +29,7 @@ let users: User[] = $state([]);
 let query: string = $state('');
 let player: User = data.users.find(user => user?.myself) ?? data.users[0];
 let currentProfile: User | undefined = $state();
+let currentSetting: 'nickname' | 'imageUrl' | null = $state(null);
 
 let categoriesEl: HTMLElement | undefined = $state();
 let bgSliderEl: HTMLElement | undefined = $state();
@@ -64,10 +68,16 @@ $effect(() => {
 });
 
 function getDrugs(drugs: Record<string, { label: string, amount: number }>) {
-    const allDrugs = Object.values(drugs);
+    const allDrugs = Object.values(drugs).filter(drug => drug.amount > 0);
     const sorted = allDrugs.sort((a, b) => b.amount - a.amount);
 
-    return sorted.slice(0, 3).map(drug => drug.label).join(', ')
+    return sorted.length > 0 ? [
+        sorted.slice(0, 3).map(drug => drug.label).join(', '), 
+        sorted.map(drug => `${drug.label}: ${drug.amount}`).join(', ')
+    ] : [
+        'No drugs sold',
+        'No drugs sold'
+    ]
 }
 
 function openProfile(user?: User) {
@@ -75,14 +85,45 @@ function openProfile(user?: User) {
     
     if (profile === null) return;
 
+    currentSetting = null;
     activeTab = 'PROFILE';
     currentProfile = profile;
+}
+
+async function editProfile() {
+    const input = (document.getElementById('setting-input') as HTMLInputElement).value;
+    
+    if (input === null || input === '' || currentSetting === null || currentProfile === undefined) return;
+
+    const response = await fetchNui('editProfile', { identifier: currentProfile.identifier, type: currentSetting, input: input });
+
+    if (response) {
+        data.users = data.users.map(user => {
+            if (user.identifier === currentProfile!.identifier) {
+                return {
+                    ...user,
+                    [currentSetting!]: input
+                }
+            }
+
+            return user
+        });
+
+        player[currentSetting!] = input;
+
+        currentProfile = {
+            ...currentProfile,
+            [currentSetting]: input
+        }
+    }
+
+    currentSetting = null;
 }
 
 </script>
 
 {#if $nuiState === NuiState.Leaderboard}
-    <div class="lb-container" transition:fade|global>
+    <div class="lb-container" transition:fade|global={{easing: linear}}>
         <!-- Main tab (header) -->
         <div class="flex items-center justify-between">
             <div class="lb-title-container">
@@ -137,7 +178,7 @@ function openProfile(user?: User) {
                                     </div>
                                 </td>
                                 <td class="text-center p-2">{user.stats.lastActive}</td>
-                                <td class="text-center p-2">{getDrugs(user.drugs)}</td>
+                                <td class="text-center p-2">{getDrugs(user.drugs)[0]}</td>
                                 <td class="text-center p-2">{Intl.NumberFormat('en-US', { style: "currency", currency: 'USD', maximumFractionDigits: 0 }).format(user.stats.earned)}</td>
                             </tr>
                         {/each}
@@ -149,16 +190,88 @@ function openProfile(user?: User) {
         <!-- Profile -->
         {#if activeTab === 'PROFILE' && currentProfile !== undefined}
             <div in:fade={{ duration: 300, easing: linear }} class="mt-7">
-                <div class="flex items-center gap-3">
-                    <div class="relative w-[100px] h-[115px]">
-                        <!-- Hexagon border -->
-                        <div class="absolute inset-0 hexagon"></div>
-                        <!-- Image -->
-                        <img src={currentProfile.imageUrl} class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[92%] h-[92%]" style="clip-path: polygon(50% 0,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%); aspect-ratio: cos(30deg);" />
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="relative w-[100px] h-[115px]">
+                            <!-- Hexagon border -->
+                            <div class="absolute inset-0 hexagon"></div>
+                            <!-- Image -->
+                            <img src={currentProfile.imageUrl} class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[92%] h-[92%]" style="clip-path: polygon(50% 0,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%); aspect-ratio: cos(30deg);" />
+                        </div>
+                        <div>
+                            <p class="text-white text-2xl flex items-center gap-3 group">
+                                {currentProfile.nickname}
+                                <span class="text-gray-400 text-lg font-light duration-300 opacity-0 group-hover:opacity-100">{data.admin || currentProfile.myself ? currentProfile.name : ''}</span>
+                            </p>
+                            <p class="text-sm text-gray-400 font-light">Last active: {currentProfile.stats.lastActive}</p>
+                            <p class="text-sm text-gray-400 font-light">Reputation: {Number(currentProfile.stats.reputation.toFixed(2)).toString()}</p>
+                        </div>
                     </div>
-                    <div>
-                        <p class="text-white text-2xl leading-5">{currentProfile.nickname}</p>
-                        <p class="text-[15px] text-gray-400 font-light">Last active: {currentProfile.stats.lastActive}</p>
+                    {#if currentProfile.myself || data.admin}
+                        <div class="flex flex-col gap-2">
+                            <button class="text-sm text-[#2dd4bf] font-light bg-[#2dd4bf20] py-[5px] px-[17px] duration-300 hover:bg-[#2dd4bf30] rounded-sm"
+                            onclick={() => currentSetting = 'nickname'}>Change username</button>
+                            <button class="text-sm text-[#2dd4bf] font-light bg-[#2dd4bf20] py-[5px] px-[17px] duration-300 hover:bg-[#2dd4bf30] rounded-sm"
+                            onclick={() => currentSetting = 'imageUrl'}>Change profile picture</button>
+                        </div>
+                    {/if}
+                </div>
+
+                <div class="lb-divider pt-3"></div>
+
+                <div class="overflow-auto h-[260px] -mr-[15px] pr-[15px] mt-3">
+                    {#if currentSetting}
+                        {#key currentSetting}
+                            <div class="bg-[radial-gradient(#71717a75,_#374151a0)] p-3 mb-3 rounded-sm flex items-center justify-between" 
+                                in:slide|global>
+                                <div>
+                                    <p class="text-[#2dd4bf] font-medium text-lg drop-shadow-[0_0_10px_#2dd4bf] leading-6">Change {currentSetting === 'imageUrl' ? 'profile picture' : 'nickname'}</p>
+                                    <p class="text-sm text-gray-400">Change your {currentSetting === 'imageUrl' ? 'profile picture' : 'nickname'} to your likings.</p>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <input id="setting-input" type="text" placeholder={currentSetting === 'imageUrl' ? 'New profile picture' : 'New nickname'} class="lb-input-search" defaultValue={currentSetting === 'imageUrl' ? currentProfile.imageUrl : currentProfile.nickname}>
+                                    <div class="relative w-[30px] h-[35px]">
+                                        <!-- Hexagon border -->
+                                        <div class="absolute inset-0 hexagon"></div>
+                                        <div class="bg-[#2dd4bf20] w-full h-full cursor-pointer duration-300 hover:bg-[#2dd4bf30]"
+                                        style="clip-path: polygon(50% 0,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%); aspect-ratio: cos(30deg);"
+                                        onclick={() => editProfile()}>
+                                            <i class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 fa-solid fa-check text-[#2dd4bf]"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {/key}
+                    {/if}
+
+                    <div class="bg-[radial-gradient(#71717a75,_#374151a0)] p-3 rounded-sm">
+                        <div>
+                            <p class="text-[#2dd4bf] font-medium text-lg drop-shadow-[0_0_10px_#2dd4bf] leading-6">Statistics</p>
+                            <p class="text-sm text-gray-400">Check player's statistics.</p>
+                        </div>
+                        <div>
+                            <table class="w-full border-separate" style="border-spacing: 0 10px;">
+                                <thead>
+                                    <tr class="text-[#9ca3af] text-sm bg-gradient-to-b from-neutral-500/0 to-[#4b556350]">
+                                        <td class="text-center py-1.5">Reputation</td>
+                                        <td class="text-center py-1.5">Earnings</td>
+                                        <td class="text-center py-1.5">Sold drugs</td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="4">
+                                            <div class="lb-divider"></div>
+                                        </td>
+                                    </tr>
+                                    <tr class="text-sm text-white bg-[radial-gradient(#71717a75,_#374151a0)]">
+                                        <td class="text-center p-2">{Number(currentProfile.stats.reputation.toFixed(2)).toString()}</td>
+                                        <td class="text-center p-2">{Intl.NumberFormat('en-US', { style: "currency", currency: 'USD', maximumFractionDigits: 0 }).format(currentProfile.stats.earned)}</td>
+                                        <td class="text-center p-2 max-w-[150px]">{getDrugs(currentProfile.drugs)[1]}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>

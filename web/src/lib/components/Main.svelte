@@ -1,5 +1,6 @@
 <script lang="ts">
 import { NuiState, nuiState, dataState } from '$lib/utils';
+import { scale, slide } from 'svelte/transition';
 
 interface Drugsale {
   itemLabel: string;
@@ -28,14 +29,15 @@ $effect(() => {
 </script>
 
 {#if $nuiState === NuiState.Main}
-  <div class="rep-wrapper">
+  <div class="rep-wrapper" transition:scale|global>
     <p>YOUR REPUTATION:</p>
     <div class="relative">
       <div class="rep-shape"></div>
       <p class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-sm">{Number(drug?.rep.toFixed(2)).toString()}</p>
     </div>
   </div>
-  <div class="text-white w-[565px] absolute top-[80%] left-1/2 -translate-x-1/2 -translate-y-1/2 flex justify-center items-center flex-col gap-3 wrapper">
+  <div class="text-white w-[565px] absolute top-[80%] left-1/2 -translate-x-1/2 -translate-y-1/2 flex justify-center items-center flex-col gap-3 wrapper"
+  transition:slide|global>
     <p class="text-lg">SELECT THE PRICE YOU WANT TO OFFER.</p>
     <p class="text-4xl text-center">CLIENT IS OFFERING TO PURCHASE {drug?.amount} {drug?.itemLabel.toUpperCase()}</p>
     <div class="w-4/5 mt-3 flex flex-col gap-5 relative">

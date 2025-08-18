@@ -1,5 +1,6 @@
 <script lang="ts">
 import { closeNui, dataState, NuiState, nuiState } from "$lib/utils";
+import { fade, scale } from "svelte/transition";
 
 interface Hustle {
   items: {
@@ -15,14 +16,14 @@ let hustle: Hustle = $dataState as unknown as Hustle;
 </script>
 
 {#if $nuiState === NuiState.Wholesale}
-    <div class="rep-wrapper">
+  <div class="rep-wrapper" transition:scale|global>
     <p>YOUR REPUTATION:</p>
     <div class="relative">
       <div class="rep-shape"></div>
       <p class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-sm">{Number(hustle.rep.toFixed(2)).toString()}</p>
     </div>
   </div>
-  <div class="hustle-container">
+  <div class="hustle-container" transition:fade|global>
     <div class="text-white w-[565px] absolute top-[80%] left-1/2 -translate-x-1/2 -translate-y-1/2 flex justify-center items-center flex-col gap-3">
       <p class="text-lg text-lime-500">OFFER</p>
       <p class="text-4xl text-center">

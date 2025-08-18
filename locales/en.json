@@ -22,5 +22,7 @@
     "client_died": "Your client died.",
     "introducing_yourself": "Intorducing yourself...",
     "renegotiating_deal": "Renegotiating deal...",
-    "webhook_wholesale_sold": "Sold %s for $%s total. Sold at (coords): %s"
+    "webhook_wholesale_sold": "Sold %s for $%s total. Sold at (coords): %s",
+    "talk": "Talk",
+    "edited_profile": "Profile has been successfully edited."
 }

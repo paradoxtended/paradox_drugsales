@@ -2,6 +2,12 @@ lib.locale()
 
 Utils = {}
 
+local scenarios = {
+    'WORLD_HUMAN_AA_COFFEE',
+    'WORLD_HUMAN_AA_SMOKE',
+    'WORLD_HUMAN_SMOKING'
+}
+
 ---@generic K, V
 ---@param t table<K, V>
 ---@return V, K
@@ -23,13 +29,7 @@ function Utils.hasJob(jobs)
         jobs = { jobs } ---@cast jobs string[]
     end
 
-    for _, job in ipairs(jobs) do
-        if job == Framework.getJob() then
-            return true
-        end
-    end
-
-    return false
+    return lib.table.contains(jobs, Framework.getJob())
 end
 
 ---Check if player has any drugs with him
@@ -74,6 +74,42 @@ function Utils.robPlayer(netId, items)
     TaskSmartFleePed(ped, cache.ped, 50.0, -1, true, true)
 
     TriggerServerEvent('prp_drugsales:rob', netId, items)
+end
+
+---@param coords vector4
+---@param model string | string[]
+---@param cb fun(entity: number)? -- callback when ped is created
+function Utils.createPed(coords, model, options, cb)
+    if type(model) ~= 'table' then model = { model } end
+
+    local model = Utils.randomFromTable(model)
+
+    if not IsModelValid(model) then
+        error('Invalid ped model: %s', model)
+    end
+
+    local ped
+    lib.points.new({
+        coords = coords.xyz,
+        distance = 100.0,
+        onEnter = function()
+            lib.requestModel(model)
+            ped = CreatePed(4, model, coords.x, coords.y, coords.z - 1.0, coords.w, false, true)
+            SetEntityInvincible(ped, true)
+            FreezeEntityPosition(ped, true)
+            SetBlockingOfNonTemporaryEvents(ped, true)
+            TaskStartScenarioInPlace(ped, Utils.randomFromTable(scenarios))
+            exports.ox_target:addLocalEntity(ped, options)
+
+            if cb then cb(ped) end -- return ped through callback
+        end,
+        onExit = function()
+            exports.ox_target:removeLocalEntity(ped)
+            DeleteEntity(ped)
+            SetModelAsNoLongerNeeded(model)
+            ped = nil
+        end
+    })
 end
 
 ---Create normal blip for coords

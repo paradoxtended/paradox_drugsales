@@ -88,6 +88,7 @@ lib.callback.register('prp_drugsales:finish', function(source, type, netId)
         for _, item in ipairs(items) do
             if player:getItemCount(item.name) < item.amount then return end
             
+            addPlayerDrug(player, item.name, item.amount)
             table.insert(store.items, { name = item.name, amount = item.amount })
             store.reputation += Config.Drugs[item.name].rep?.add or Config.DefaultRep
             store.total += item.price * item.amount
@@ -101,6 +102,7 @@ lib.callback.register('prp_drugsales:finish', function(source, type, netId)
 
             player:addAccountMoney(data.account or Config.DefaultAccount, store.total)
             addPlayerRep(player, store.reputation / data.divisor)
+            addPlayerEarnings(player, store.total)
             Utils.logToDiscord(source, player, locale('webhook_wholesale_sold', table.concat(store.message, ', '), store.total, GetEntityCoords(GetPlayerPed(source))))
         end)
 

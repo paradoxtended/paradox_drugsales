@@ -2,6 +2,7 @@ local createQuery = [[
     CREATE TABLE IF NOT EXISTS `prp_drugsales` (
         `identifier` varchar(50) NOT NULL,
         `reputation` float NOT NULL,
+        `data` longtext NOT NULL,
         PRIMARY KEY (`identifier`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 ]]
@@ -52,10 +53,29 @@ AddEventHandler('onResourceStop', function(resource)
 	end
 end)
 
-
 local function createPlayer(identifier)
+    local player = Framework.getPlayerFromIdentifier(identifier)
+
+    if not player then return end
+
     reps[identifier] = 0.0
-    MySQL.insert.await('INSERT INTO prp_drugsales (identifier, reputation) VALUES (?, ?)', { identifier, reps[identifier] })
+
+    ---@type User
+    local jsonData = {
+        name = player:getFirstName() .. ' ' .. player:getLastName(),
+        nickname = GetPlayerName(player.source),
+        imageUrl = 'https://i.postimg.cc/nrJ96vNc/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-vector.jpg', -- Default pfp
+        stats = { earned = 0, lastActive = os.date("%m/%d/%Y, %I:%M:%S %p", os.time()), reputation = reps[identifier] },
+        drugs = (function()
+            local drugs = {}
+            for drugName, _ in pairs(Config.Drugs) do
+                drugs[drugName] = { label = Utils.getItemLabel(drugName), amount = 0 }
+            end
+            return drugs
+        end)(),
+    }
+
+    MySQL.insert.await('INSERT INTO prp_drugsales (identifier, reputation, data) VALUES (?, ?, ?)', { identifier, reps[identifier], json.encode(jsonData) })
 end
 
 lib.callback.register('prp_drugsales:getReputation', function(source)
@@ -72,7 +92,7 @@ lib.callback.register('prp_drugsales:getReputation', function(source)
     return reps[identifier]
 end)
 
----Add or remove player's reputation
+---Add or remove player's reputation, also updating reputation and lastActive params in users table
 ---@param player Player
 ---@param amount number
 function addPlayerRep(player, amount)
@@ -80,11 +100,16 @@ function addPlayerRep(player, amount)
 
     reps[identifier] += amount
 
+    local user = getDealerUser(player)
+    user.stats.reputation += amount
+    user.stats.lastActive = os.date("%m/%d/%Y, %I:%M:%S %p", os.time())
+
     TriggerClientEvent('prp_drugsales:updateReputation', player.source, reps[identifier])
 end
 
----@param player Player
+---@param player Player | string
 ---@return number
 function getPlayerRep(player)
-    return reps[player:getIdentifier()]
+    local identifier = type(player) == 'string' and player or player:getIdentifier()
+    return reps[identifier]
 end

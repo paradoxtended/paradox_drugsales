@@ -27,6 +27,8 @@ Config.DefaultAcceptChance = 90.0
 Config.DefaultAccount = 'money'
 --- Jobs that get dispatched when player will fail the deal
 Config.PoliceJobs = { 'police', 'sheriff' }
+--- Groups that can change player's nickname or profile picture
+Config.AdminGroups = { 'god', 'admin', 'mod' }
 ---@type Dispatch
 Config.DispatchData = {
     Chance = 50,
@@ -158,6 +160,19 @@ Config.Wholesale = {
             drugsVariety = 3,
             divisor = 2.0
         }
+    }
+}
+
+---@class Dealer
+---@field models string | string[]
+---@field locations vector4[]
+---@field random boolean? If set to true, random locations will be picked
+
+---@type Dealer
+Config.Dealers = {
+    models = `g_m_m_armboss_01`,
+    locations = {
+        vector4(1320.0712, -1662.1143, 51.2364, 127.6907)
     }
 }
 

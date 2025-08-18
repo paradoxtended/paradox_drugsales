@@ -19,13 +19,15 @@ debugData([
           nickname: 'Enzoo',
           imageUrl: 'https://i.postimg.cc/8CCKvsRZ/Enzo-Favara.jpg',
           stats: {
-            earned: 578421,
-            lastActive: '08/16/2025, 03:27:45 PM'
+            earned: 688421,
+            lastActive: '08/16/2025, 03:27:45 PM',
+            reputation: 24.564
           },
           drugs: {
             meth_bag: { label: 'Meth Bag', amount: 48 },
             coke_bag: { label: 'Coke Bag', amount: 75 },
-            meth_syringe: { label: 'Meth Syringe', amount: 92 }
+            meth_syringe: { label: 'Meth Syringe', amount: 92 },
+            coke_brick: { label: 'Coke Brick', amount: 150 }
           },
           myself: true
         },
@@ -35,7 +37,8 @@ debugData([
           imageUrl: 'https://i.postimg.cc/BQ08mBGj/Sunset-in-Grace-Bay-Turks-and-Caicos-Islands-scaled.jpg',
           stats: {
             earned: 184752,
-            lastActive: '08/14/2025, 02:27:48 PM'
+            lastActive: '08/14/2025, 02:27:48 PM',
+            reputation: 12.4516
           },
           drugs: {
             weed_joint: { label: 'Weed Joint', amount: 41 },
@@ -48,19 +51,48 @@ debugData([
   }
 ])
 
+/*
+debugData([
+  {
+    action: 'hustle',
+    data: {
+      items: [
+        { label: 'Meth Bag', amount: 1, price: 48 }
+      ],
+      rep: 0.56,
+      renegotiate: true
+    }
+  }
+])
+*/
+
+/*
+debugData([
+  {
+    action: 'openDrugsale',
+    data: {
+      itemLabel: 'Meth Bag',
+      amount: 15,
+      price: { min: 110, max: 180 },
+      rep: 1.54
+    }
+  }
+])
+*/
+
 useNuiEvent('openDrugsale', (data) => {
-  nuiState.set(NuiState.Main);
   dataState.set(data);
+  nuiState.set(NuiState.Main);
 })
 
 useNuiEvent('hustle', (data) => {
-  nuiState.set(NuiState.Wholesale);
   dataState.set(data);
+  nuiState.set(NuiState.Wholesale);
 })
 
 useNuiEvent('leaderboard', (data) => {
-  nuiState.set(NuiState.Leaderboard);
   dataState.set(data);
+  nuiState.set(NuiState.Leaderboard);
 })
 
 if (isEnvBrowser()) {
@@ -89,7 +121,7 @@ function onKeyDown(event: KeyboardEvent) {
 <svelte:window onkeydown={onKeyDown} />
 
 {#if $nuiState !== NuiState.Closed}
-  <Main bind:selectedPrice />
-  <Wholesale />
-  <Leaderboard />
+  {#if $nuiState === NuiState.Main} <Main bind:selectedPrice /> {/if}
+  {#if $nuiState === NuiState.Wholesale} <Wholesale /> {/if}
+  {#if $nuiState === NuiState.Leaderboard} <Leaderboard /> {/if}
 {/if}

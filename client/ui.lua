@@ -67,3 +67,8 @@ RegisterNuiCallback('hustle', function(result, cb)
 
     p:resolve(result)
 end)
+
+RegisterNuiCallback('closeUI', function(_, cb)
+    cb(1)
+    SetNuiFocus(false, false)
+end)
