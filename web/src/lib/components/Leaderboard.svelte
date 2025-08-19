@@ -36,7 +36,7 @@ let searchQuery: string = $state('');
 let Users: ExtendedUser[] = $state([]);
 let Player: ExtendedUser | undefined = $state();
 let SortType: 'ASC' | 'DESC' = $state('DESC');
-let SortBy: 'earned' | 'reputation' | 'totalDrugs' = $state('earned');
+let SortBy: 'earned' | 'reputation' | 'totalDrugs' = $state('reputation');
 let PAGE: number = $state(1);
 let totalPages = $state(1);
 let profile: ExtendedUser | undefined = $state();
@@ -80,21 +80,21 @@ $effect(() => {
     Users = filter.slice((PAGE - 1) * pageSize, PAGE * pageSize);
 })
 
-function getPlayerDrugs(user: User, all?: boolean) {
+function getPlayerDrugs(user: User, type?: 'all' | 'count') {
     const allDrugs = Object.values(user.drugs).filter(drug => drug.amount > 0);
     const sorted = allDrugs.sort((a, b) => b.amount - a.amount);
 
     if (sorted.length < 1)
         return 'No drugs sold'
 
-    if (all)
+    if (type === 'count')
+        return sorted.reduce((sum, drug) => sum + drug.amount, 0)
+
+    if (type === 'all')
         return sorted.map(drug => `${drug.amount}x ${drug.label}`).join(', ')
 
     // return first 3 drugs and total amount of drugs
-    return [
-        sorted.slice(0, 3).map(drug => drug.label).join(', '),
-        sorted.reduce((sum, drug) => sum + drug.amount, 0)
-    ]
+    return sorted.slice(0, 3).map(drug => drug.label).join(', ')
 }
 
 function getStandingColor(standing: number): string {
@@ -177,12 +177,6 @@ async function editProfile() {
                                     <td></td>
                                     <td>Most sellable drugs</td>
                                     <td>
-                                        <div class="flex items-center gap-2 cursor-pointer" onclick={() => { SortBy = 'earned'; SortType = SortType === 'DESC' ? 'ASC' : 'DESC'; }}>
-                                            <p>Earnings</p>
-                                            <i class="fa-solid {SortType === 'DESC' && SortBy === 'earned' ? 'fa-arrow-down-wide-short' : 'fa-arrow-up-wide-short'} text-xs"></i>
-                                        </div>
-                                    </td>
-                                    <td>
                                         <div class="flex items-center gap-2 cursor-pointer" onclick={() => { SortBy = 'reputation'; SortType = SortType === 'DESC' ? 'ASC' : 'DESC'; }}>
                                             <p>REP</p>
                                             <i class="fa-solid {SortType === 'DESC' && SortBy === 'reputation' ? 'fa-arrow-down-wide-short' : 'fa-arrow-up-wide-short'} text-xs"></i>
@@ -214,10 +208,9 @@ async function editProfile() {
                                                 <p>{user.nickname}</p>
                                             </div>
                                         </td>
-                                        <td>{getPlayerDrugs(user)[0]}</td>
-                                        <td>{Intl.NumberFormat('en-US', { style: "currency", currency: 'USD', maximumFractionDigits: 0 }).format(user.stats.earned)}</td>
+                                        <td>{getPlayerDrugs(user)}</td>
                                         <td>{Number(user.stats.reputation.toFixed(2)).toString()}</td>
-                                        <td>{getPlayerDrugs(user)[1].toLocaleString('en-US')}</td>
+                                        <td>{getPlayerDrugs(user, 'count').toLocaleString('en-US')}</td>
                                     </tr>
                                 {/each}
                             </tbody>
@@ -278,7 +271,7 @@ async function editProfile() {
                                         <td>Last active</td>
                                         {#if data.admin || profile.myself}<td>Character name</td>{/if}
                                         <td>Sold drugs</td>
-                                        <td>Earnings</td>
+                                        {#if data.admin || profile.myself}<td>Earnings</td>{/if}
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -286,8 +279,10 @@ async function editProfile() {
                                         <td>{Number(profile.stats.reputation.toFixed(2)).toString()}</td>
                                         <td>{profile.stats.lastActive}</td>
                                         {#if data.admin || profile.myself}<td>{profile.name}</td>{/if}
-                                        <td>{getPlayerDrugs(profile, true)}</td>
-                                        <td>{Intl.NumberFormat('en-US', { style: "currency", currency: 'USD', maximumFractionDigits: 0 }).format(profile.stats.earned)}</td>
+                                        <td>{getPlayerDrugs(profile, 'all')}</td>
+                                        {#if data.admin || profile.myself}
+                                            <td>{Intl.NumberFormat('en-US', { style: "currency", currency: 'USD', maximumFractionDigits: 0 }).format(profile.stats.earned)}</td>
+                                        {/if}
                                     </tr>
                                 </tbody>
                             </table>

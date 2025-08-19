@@ -71,4 +71,6 @@ end)
 RegisterNuiCallback('closeUI', function(_, cb)
     cb(1)
     SetNuiFocus(false, false)
+
+    removeTabletObject()
 end)

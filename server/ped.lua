@@ -21,7 +21,6 @@ MySQL.ready(function()
             local data = json.decode(entry.data)
             
             users[entry.identifier] = {
-                identifier = entry.identifier,
                 name = data.name,
                 nickname = data.nickname,
                 imageUrl = data.imageUrl,

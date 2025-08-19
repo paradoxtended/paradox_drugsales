@@ -165,14 +165,21 @@ Config.Wholesale = {
 
 ---@class Dealer
 ---@field models string | string[]
+---@field blip BlipData?
 ---@field locations vector4[]
 ---@field random boolean? If set to true, random locations will be picked
 
 ---@type Dealer
 Config.Dealers = {
     models = `g_m_m_armboss_01`,
+    blip = {
+        name = 'Dealer',
+        color = 0,
+        scale = 0.75,
+        sprite = 480
+    },
     locations = {
-        vector4(1320.0712, -1662.1143, 51.2364, 127.6907)
+        vector4(1159.2789, -1643.3324, 36.9630, 204.1892)
     }
 }
 

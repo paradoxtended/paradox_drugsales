@@ -115,8 +115,9 @@ end
 ---Create normal blip for coords
 ---@param coords vector3 | vector4
 ---@param data BlipData
----@return integer
 function Utils.createBlip(coords, data)
+    if not data then return end
+
     local blip = AddBlipForCoord(coords.x, coords.y, coords.z)
 
     SetBlipSprite (blip, data.sprite)
