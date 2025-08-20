@@ -2,6 +2,7 @@
 import { dataState } from "$lib/utils";
 import { fetchNui } from "$lib/utils/fetchNui";
 import { fade } from "svelte/transition";
+import Loader from "./Loader.svelte";
 
 interface User {
     identifier: string;
@@ -22,18 +23,32 @@ interface ExtendedUser extends User {
     id: number;
 }
 
+interface Challenge {
+    title: string;
+    description: string;
+    progress: number;
+    claimed: boolean;
+}
+
 interface LeaderboardProps {
     users: User[];
     admin?: boolean;
 }
 
+let mounting: boolean = true; // helper for first loading (won't load for the first time)
 let data: LeaderboardProps = $state($dataState as unknown as LeaderboardProps);
 let pageSize: number = 5;
 
+let loading: boolean = $state(false);
 let time: string = $state('08:42 AM');
-let TAB: 'home' | 'profile' = $state('home');
+let TAB: 'home' | 'profile' | 'challenges' = $state('home');
 let searchQuery: string = $state('');
 let Users: ExtendedUser[] = $state([]);
+let Challenges: Challenge[] | undefined = $state([
+    { title: 'Sell 4/5 Meth bag', description: 'Sell specified drug to claim this challenge', progress: 80, claimed: false },
+    { title: 'Sell 8/8 Weed Joint', description: 'Sell specified drug to claim this challenge', progress: 100, claimed: false },
+    { title: 'Sell 50/50 drugs', description: 'Sell drugs to claim this challenge', progress: 100, claimed: true }
+]);
 let Player: ExtendedUser | undefined = $state();
 let SortType: 'ASC' | 'DESC' = $state('DESC');
 let SortBy: 'earned' | 'reputation' | 'totalDrugs' = $state('reputation');
@@ -80,6 +95,21 @@ $effect(() => {
     Users = filter.slice((PAGE - 1) * pageSize, PAGE * pageSize);
 })
 
+// effect for loader
+$effect(() => {
+    TAB;
+
+    if (mounting) {
+        mounting = false;
+        return
+    };
+
+    loading = true;
+
+    const t = setTimeout(() => loading = false, 300);
+    return () => clearTimeout(t);
+})
+
 function getPlayerDrugs(user: User, type?: 'all' | 'count') {
     const allDrugs = Object.values(user.drugs).filter(drug => drug.amount > 0);
     const sorted = allDrugs.sort((a, b) => b.amount - a.amount);
@@ -117,6 +147,16 @@ function openProfile(user?: ExtendedUser) {
     TAB = 'profile';
 }
 
+async function openChallenges(user?: ExtendedUser) {
+    const player = user || Player;
+
+    profile = player as ExtendedUser;
+    TAB = 'challenges';
+
+    const response: Challenge[] = await fetchNui('getChallenges', { identifier: profile.identifier })
+    Challenges = response;
+}
+
 async function editProfile() {
     const box = document.getElementById('setting-box') as HTMLElement;
     if (box === null || box.className === 'loader') return;
@@ -149,11 +189,18 @@ async function editProfile() {
                 <i class="fa-solid fa-house" onclick={() => TAB = 'home'}></i>
             </div>
             <div>
+                <i class="fa-solid fa-briefcase" onclick={() => openChallenges()}></i>
                 <i class="fa-solid fa-user" onclick={() => openProfile()}></i>
             </div>
         </div>
 
-        {#if TAB === 'home'}
+        {#if loading}
+            <div class="w-full h-full flex items-center justify-center">
+                <Loader />
+            </div>
+        {/if}
+
+        {#if TAB === 'home' && !loading}
             <div class="px-5 py-3 relative" in:fade>
                 <div class="flex items-center justify-between">
                     <div>
@@ -223,7 +270,7 @@ async function editProfile() {
             </div>
         {/if}
 
-        {#if TAB === 'profile' && profile}
+        {#if TAB === 'profile' && profile && !loading}
             <div class="px-5 py-3 relative" in:fade>
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3 relative">
@@ -286,6 +333,45 @@ async function editProfile() {
                             </tbody>
                         </table>
                     </div>
+                </div>
+            </div>
+        {/if}
+
+        {#if TAB === 'challenges' && profile && Challenges && !loading}
+            <div class="px-5 py-3 relative" in:fade>
+                <div>
+                    <p class="text-[30px] leading-9">Daily challenges</p>
+                    <p class="text-gray-400">Check {profile.nickname}'s daily challenges</p>
+                </div>
+
+                <div class="flex flex-col gap-1 mt-3 h-[290px] overflow-auto -mr-2.5 pr-2.5">
+                    {#each Challenges as challenge, id}
+                        <div class="bg-gradient-to-r from-[#0a0a0aa0] to-[#17171750] p-5 rounded flex items-center justify-between">
+                            <div>
+                                <p class="text-lg">{challenge.title}</p>
+                                <p class="text-gray-400 font-light">{challenge.description}</p>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="w-[175px] h-[5px] bg-neutral-950">
+                                    <div class="h-full bg-lime-500" style="width: {challenge.progress}%; filter: drop-shadow(0 0 5px #84cc16);"></div>
+                                </div>
+                                {#if challenge.claimed}
+                                    <div class="border border-lime-500 w-7 h-7 rounded-full flex items-center justify-center cursor-pointer bg-lime-500/10 pointer-events-none">
+                                        <div class="fa-solid fa-check"></div>
+                                    </div> 
+                                {:else}
+                                    {#if challenge.progress < 100}
+                                        <div class="border border-lime-500 w-8 h-8 rounded-full flex items-center justify-center cursor-pointer bg-lime-500/10 hover:bg-lime-500/25 duration-300">
+                                            <div id="challenge-{id}-refresh" class="hgi hgi-stroke hgi-reload pointer-events-none"></div>
+                                        </div>
+                                    {/if}
+                                    <div class="border border-lime-500 w-8 h-8 rounded-full flex items-center justify-center cursor-pointer bg-lime-500/10 hover:bg-lime-500/25 duration-300">
+                                        <div id="challenge-{id}-claim" class="hgi hgi-stroke hgi-hold-03 text-lg pointer-events-none"></div>
+                                    </div>
+                                {/if}
+                            </div>
+                        </div>
+                    {/each}
                 </div>
             </div>
         {/if}
