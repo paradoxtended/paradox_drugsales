@@ -10,7 +10,18 @@ function Utils.randomFromTable(t)
         error("expected table, recieved: %s", type(t))
     end
 
-    local index = math.random(1, #t)
+    local count = #t
+    if count > 0 then
+        local index = math.random(1, count)
+        return t[index], index
+    end
+
+    local keys = {}
+    for k in pairs(t) do
+        table.insert(keys, k)
+    end
+
+    local index = keys[math.random(1, #keys)]
     return t[index], index
 end
 

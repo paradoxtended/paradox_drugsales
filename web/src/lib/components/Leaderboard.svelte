@@ -44,11 +44,7 @@ let time: string = $state('08:42 AM');
 let TAB: 'home' | 'profile' | 'challenges' = $state('home');
 let searchQuery: string = $state('');
 let Users: ExtendedUser[] = $state([]);
-let Challenges: Challenge[] | undefined = $state([
-    { title: 'Sell 4/5 Meth bag', description: 'Sell specified drug to claim this challenge', progress: 80, claimed: false },
-    { title: 'Sell 8/8 Weed Joint', description: 'Sell specified drug to claim this challenge', progress: 100, claimed: false },
-    { title: 'Sell 50/50 drugs', description: 'Sell drugs to claim this challenge', progress: 100, claimed: true }
-]);
+let Challenges: Challenge[] | undefined = $state();
 let Player: ExtendedUser | undefined = $state();
 let SortType: 'ASC' | 'DESC' = $state('DESC');
 let SortBy: 'earned' | 'reputation' | 'totalDrugs' = $state('reputation');
@@ -287,6 +283,10 @@ async function editProfile() {
                             </div>
                             <p class="text-[16px] text-gray-400 font-light leading-4">Last active {profile.stats.lastActive}</p>
                             <p class="text-[16px] text-gray-400 font-light">Dealer's reputation {Number(profile.stats.reputation.toFixed(2)).toString()} rep</p>
+                            {#if profile.myself || data.admin}
+                                <button class="bg-neutral-900 text-sm font-light px-5 py-0.5 rounded-full border border-neutral-700 mt-1 hover:bg-neutral-800 duration-300"
+                                    onclick={() => openChallenges(profile)}>Daily Challenges</button>
+                            {/if}
                         </div>
                         <div class="lb-profile-position">
                             <span class="text-gray-400 text-lg">#</span>

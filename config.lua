@@ -27,7 +27,7 @@ Config.DefaultAcceptChance = 90.0
 Config.DefaultAccount = 'money'
 --- Jobs that get dispatched when player will fail the deal
 Config.PoliceJobs = { 'police', 'sheriff' }
---- Groups that can change player's nickname or profile picture
+--- Groups that can change player's nickname, profile picture or see other players daily challenges
 Config.AdminGroups = { 'god', 'admin', 'mod' }
 ---@type Dispatch
 Config.DispatchData = {
@@ -180,6 +180,18 @@ Config.Dealers = {
     },
     locations = {
         vector4(1159.2789, -1643.3324, 36.9630, 204.1892)
+    }
+}
+
+---@class Quests
+---@field amount number
+---@field daily { multiplier: { amount: number, price: number } } Drug amount and price will be multiplied by this, drugs are random from Config.Drugs
+
+---@type Quests
+Config.Quests = {
+    amount = 3,
+    daily = {
+        multiplier = { amount = 5, price = 0.5 }
     }
 }
 
