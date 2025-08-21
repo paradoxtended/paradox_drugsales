@@ -167,6 +167,7 @@ Config.Wholesale = {
 ---@field models string | string[]
 ---@field blip BlipData?
 ---@field locations vector4[]
+---@field items OxShop
 ---@field random boolean? If set to true, random locations will be picked
 
 ---@type Dealer
@@ -179,19 +180,31 @@ Config.Dealers = {
         sprite = 480
     },
     locations = {
-        vector4(1159.2789, -1643.3324, 36.9630, 204.1892)
+        vector4(1159.2789, -1643.3324, 36.9630, 204.1892),
+        vector4(373.7685, -1787.6117, 29.0955, 144.4449)
+    },
+    items = {
+        { name = 'weapon_pistol', price = 3500 },
+        { name = 'drug_phone', price = 15 },
     }
 }
 
+---@class QuestsData
+---@field multiplier { amount: number, price: number } Drug amount and price will be multiplied by those values
+---@field refreshCount number How many player can refresh his quests
+---@field account AccountType?
+
 ---@class Quests
 ---@field amount number
----@field daily { multiplier: { amount: number, price: number } } Drug amount and price will be multiplied by this, drugs are random from Config.Drugs
+---@field daily QuestsData
 
 ---@type Quests
 Config.Quests = {
     amount = 3,
     daily = {
-        multiplier = { amount = 5, price = 0.5 }
+        multiplier = { amount = 5, price = 0.5 },
+        refreshCount = 3,
+        account = 'money'
     }
 }
 

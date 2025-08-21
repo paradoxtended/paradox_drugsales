@@ -143,16 +143,6 @@ function openProfile(user?: ExtendedUser) {
     TAB = 'profile';
 }
 
-async function openChallenges(user?: ExtendedUser) {
-    const player = user || Player;
-
-    profile = player as ExtendedUser;
-    TAB = 'challenges';
-
-    const response: Challenge[] = await fetchNui('getChallenges', { identifier: profile.identifier })
-    Challenges = response;
-}
-
 async function editProfile() {
     const box = document.getElementById('setting-box') as HTMLElement;
     if (box === null || box.className === 'loader') return;
@@ -173,6 +163,31 @@ async function editProfile() {
     }
 
     box.className = 'fa-solid fa-check';
+}
+
+async function openChallenges(user?: ExtendedUser) {
+    const player = user || Player;
+
+    profile = player as ExtendedUser;
+    TAB = 'challenges';
+
+    const response: Challenge[] = await fetchNui('getQuests', profile.identifier)
+    Challenges = response;
+}
+
+async function handleChallenge(type: 'refresh' | 'claim', id: number) {
+    const box = document.getElementById(`challenge-${id}-${type}`) as HTMLElement;
+    
+    if (box === null || box.className === 'loader' || profile === undefined) return;
+
+    box.className = 'loader';
+
+    const response: Challenge[] = await fetchNui(type + 'Quest', { identifier: profile.identifier, id: id })
+    
+    if (response) 
+        Challenges = response
+
+    box.className = `hgi hgi-stroke hgi-${type === 'refresh' ? 'reload' : 'hold-03 text-lg'} pointer-events-none`;
 }
 
 </script>
@@ -337,43 +352,47 @@ async function editProfile() {
             </div>
         {/if}
 
-        {#if TAB === 'challenges' && profile && Challenges && !loading}
-            <div class="px-5 py-3 relative" in:fade>
-                <div>
-                    <p class="text-[30px] leading-9">Daily challenges</p>
-                    <p class="text-gray-400">Check {profile.nickname}'s daily challenges</p>
-                </div>
+        {#key Challenges}
+            {#if TAB === 'challenges' && profile && Challenges && !loading}
+                <div class="px-5 py-3 relative" in:fade>
+                    <div>
+                        <p class="text-[30px] leading-9">Daily challenges</p>
+                        <p class="text-gray-400">Check {profile.nickname}'s daily challenges</p>
+                    </div>
 
-                <div class="flex flex-col gap-1 mt-3 h-[290px] overflow-auto -mr-2.5 pr-2.5">
-                    {#each Challenges as challenge, id}
-                        <div class="bg-gradient-to-r from-[#0a0a0aa0] to-[#17171750] p-5 rounded flex items-center justify-between">
-                            <div>
-                                <p class="text-lg">{challenge.title}</p>
-                                <p class="text-gray-400 font-light">{challenge.description}</p>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <div class="w-[175px] h-[5px] bg-neutral-950">
-                                    <div class="h-full bg-lime-500" style="width: {challenge.progress}%; filter: drop-shadow(0 0 5px #84cc16);"></div>
+                    <div class="flex flex-col gap-1 mt-3 h-[290px] overflow-auto -mr-2.5 pr-2.5">
+                        {#each Challenges as challenge, id}
+                            <div class="bg-gradient-to-r from-[#0a0a0aa0] to-[#17171750] p-5 rounded flex items-center justify-between">
+                                <div>
+                                    <p class="text-lg">{challenge.title}</p>
+                                    <p class="text-gray-400 font-light">{challenge.description}</p>
                                 </div>
-                                {#if challenge.claimed}
-                                    <div class="border border-lime-500 w-7 h-7 rounded-full flex items-center justify-center cursor-pointer bg-lime-500/10 pointer-events-none">
-                                        <div class="fa-solid fa-check"></div>
-                                    </div> 
-                                {:else}
-                                    {#if challenge.progress < 100}
-                                        <div class="border border-lime-500 w-8 h-8 rounded-full flex items-center justify-center cursor-pointer bg-lime-500/10 hover:bg-lime-500/25 duration-300">
-                                            <div id="challenge-{id}-refresh" class="hgi hgi-stroke hgi-reload pointer-events-none"></div>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-[175px] h-[5px] bg-neutral-950">
+                                        <div class="h-full bg-lime-500" style="width: {challenge.progress}%; filter: drop-shadow(0 0 5px #84cc16);"></div>
+                                    </div>
+                                    {#if challenge.claimed}
+                                        <div class="border border-lime-500 w-7 h-7 rounded-full flex items-center justify-center cursor-pointer bg-lime-500/10 pointer-events-none">
+                                            <div class="fa-solid fa-check"></div>
+                                        </div> 
+                                    {:else}
+                                        {#if challenge.progress < 100}
+                                            <div class="border border-lime-500 w-8 h-8 rounded-full flex items-center justify-center cursor-pointer bg-lime-500/10 hover:bg-lime-500/25 duration-300"
+                                                onclick={() => handleChallenge('refresh', id)}>
+                                                <div id="challenge-{id}-refresh" class="hgi hgi-stroke hgi-reload pointer-events-none"></div>
+                                            </div>
+                                        {/if}
+                                        <div class="border border-lime-500 w-8 h-8 rounded-full flex items-center justify-center cursor-pointer bg-lime-500/10 hover:bg-lime-500/25 duration-300"
+                                             onclick={() => handleChallenge('claim', id)}>
+                                            <div id="challenge-{id}-claim" class="hgi hgi-stroke hgi-hold-03 text-lg pointer-events-none"></div>
                                         </div>
                                     {/if}
-                                    <div class="border border-lime-500 w-8 h-8 rounded-full flex items-center justify-center cursor-pointer bg-lime-500/10 hover:bg-lime-500/25 duration-300">
-                                        <div id="challenge-{id}-claim" class="hgi hgi-stroke hgi-hold-03 text-lg pointer-events-none"></div>
-                                    </div>
-                                {/if}
+                                </div>
                             </div>
-                        </div>
-                    {/each}
+                        {/each}
+                    </div>
                 </div>
-            </div>
-        {/if}
+            {/if}
+        {/key}
     </div>
 </div>

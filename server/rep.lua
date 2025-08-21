@@ -70,6 +70,7 @@ local function createPlayer(identifier)
         drugs = {},
     }
 
+    createQuests(identifier)
     addPlayerLeaderboard(identifier, jsonData)
     MySQL.insert.await('INSERT INTO prp_drugsales (identifier, reputation, data) VALUES (?, ?, ?)', { identifier, reps[identifier], json.encode(jsonData) })
 end

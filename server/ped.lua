@@ -18,6 +18,7 @@ MySQL.ready(function()
 
     if status then
         for _, entry in ipairs(data) do
+            createQuests(entry.identifier)
             local data = json.decode(entry.data)
             
             users[entry.identifier] = {
@@ -127,6 +128,8 @@ function addPlayerDrug(player, drugName, amount)
     else
         user.drugs[drugName].amount += amount
     end
+
+    updateQuests(player, drugName, amount)
 end
 
 ---@param player Player
@@ -151,3 +154,21 @@ end
 function getDealerUser(player)
     return users[player:getIdentifier()]
 end
+
+local function registerShop()
+    local data = Config.Dealers
+
+    local locations = {}
+
+    for _, coords in ipairs(data.locations) do
+        table.insert(locations, coords.xyz)
+    end
+
+    exports.ox_inventory:RegisterShop('dealerShop', {
+        name = locale('dealer_shop_label'),
+        inventory = data.items,
+        locations = locations,
+    })
+end
+
+registerShop()

@@ -23,8 +23,13 @@
     "introducing_yourself": "Intorducing yourself...",
     "renegotiating_deal": "Renegotiating deal...",
     "webhook_wholesale_sold": "Sold %s for $%s total. Sold at (coords): %s",
+    "dealer_shop_label": "Dealer's goods",
     "talk": "Talk",
     "edited_profile": "Profile has been successfully edited.",
     "quest_title": "Sell %s/%s %s ($%s)",
-    "quest_description": "Sell specified drug to claim this reward."
+    "quest_description": "Sell specified drug to claim this reward.",
+    "quest_cant_refresh": "You cannot refresh quests anymore.",
+    "quest_not_finished": "Quest is not finished yet.",
+    "quest_not_owner": "You are not the owner of this quest.",
+    "quest_claimed": "Quest claimed successfully."
 }

@@ -42,12 +42,19 @@ local function showTablet()
     })
 end
 
-for _, coords in ipairs(Config.Dealers.locations) do
+for id, coords in ipairs(Config.Dealers.locations) do
     Utils.createPed(coords, Config.Dealers.models, {
         {
             label = locale('talk'),
             icon = 'fa-solid fa-comment',
             onSelect = showTablet
+        },
+        {
+            label = locale('dealer_shop_label'),
+            icon = 'fas fa-shopping-basket',
+            onSelect = function()
+                exports.ox_inventory:openInventory('shop', { type = 'dealerShop', id = id })
+            end
         }
     }, function(entity)
         ped = entity
