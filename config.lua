@@ -184,8 +184,8 @@ Config.Dealers = {
         vector4(373.7685, -1787.6117, 29.0955, 144.4449)
     },
     items = {
-        { name = 'weapon_pistol', price = 3500 },
-        { name = 'drug_phone', price = 15 },
+        { name = 'weapon_pistol', price = 3500, count = 10 },
+        { name = 'drug_phone', price = 500, count = 10 }
     }
 }
 
