@@ -3,6 +3,7 @@ import { dataState } from "$lib/utils";
 import { fetchNui } from "$lib/utils/fetchNui";
 import { fade } from "svelte/transition";
 import Loader from "./Loader.svelte";
+import { isEnvBrowser } from "$lib/utils/misc";
 
 interface User {
     identifier: string;
@@ -44,7 +45,7 @@ let time: string = $state('08:42 AM');
 let TAB: 'home' | 'profile' | 'challenges' = $state('home');
 let searchQuery: string = $state('');
 let Users: ExtendedUser[] = $state([]);
-let Challenges: Challenge[] | undefined = $state();
+let Challenges: Challenge[] | undefined = $state(isEnvBrowser() ? [{ title: 'Sell 4/5 Meth bag ($500)', description: 'Sell specified drug.', progress: 50, claimed: false }] : undefined);
 let Player: ExtendedUser | undefined = $state();
 let SortType: 'ASC' | 'DESC' = $state('DESC');
 let SortBy: 'earned' | 'reputation' | 'totalDrugs' = $state('reputation');
