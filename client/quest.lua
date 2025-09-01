@@ -1,3 +1,5 @@
+if Config.Quests.disabled then return end
+
 ---@param rawQuests Quest[]
 local function getDescribedQuests(rawQuests)
     local quests = {}
@@ -15,10 +17,12 @@ local function getDescribedQuests(rawQuests)
     return quests
 end
 
----@param identifier string
-RegisterNUICallback('getQuests', function(identifier, cb)
+---@param data { identifier: string, type: 'daily' | 'weekly' }
+RegisterNUICallback('getQuests', function(data, cb)
+    local identifier, type in data
+
     ---@type Quest[]
-    local rawQuests = lib.callback.await('prp_drugsales:getPlayerQuests', false, identifier)
+    local rawQuests = lib.callback.await('prp_drugsales:getPlayerQuests', false, identifier, type)
 
     if not rawQuests then
         cb(0)

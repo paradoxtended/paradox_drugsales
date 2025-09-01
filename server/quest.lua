@@ -1,3 +1,5 @@
+if Config.Quests.disabled then return end
+
 ---@class Quest
 ---@field claimed boolean
 ---@field item string
@@ -38,10 +40,14 @@ end
 
 ---@param source number
 ---@param targetIdentifier string
-lib.callback.register('prp_drugsales:getPlayerQuests', function(source, targetIdentifier)
+---@param type 'daily' | 'weekly'
+lib.callback.register('prp_drugsales:getPlayerQuests', function(source, targetIdentifier, type)
     local player = Framework.getPlayerFromId(source)
 
-    if not player or not quests[targetIdentifier] then return end
+    if not player 
+    or type == 'daily' and not quests[targetIdentifier] then 
+        return
+    end
 
     local identifier = player:getIdentifier()
 

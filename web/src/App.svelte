@@ -3,7 +3,7 @@ import Leaderboard from '$lib/components/Leaderboard.svelte';
 import Main from '$lib/components/Main.svelte';
 import Wholesale from '$lib/components/Wholesale.svelte';
 import { useNuiEvent } from '$lib/hooks/useNuiEvents';
-import { closeNui, dataState, NuiState, nuiState } from '$lib/utils';
+import { closeNui, dataState, NuiState, nuiState, questsState } from '$lib/utils';
 import { debugData } from '$lib/utils/debugData';
 import { isEnvBrowser } from '$lib/utils/misc';
 
@@ -95,6 +95,10 @@ useNuiEvent('hustle', (data) => {
 useNuiEvent('leaderboard', (data) => {
   dataState.set(data);
   nuiState.set(NuiState.Leaderboard);
+})
+
+useNuiEvent('init', (data: any) => {
+  questsState.set(data.enableQuests);
 })
 
 if (isEnvBrowser()) {

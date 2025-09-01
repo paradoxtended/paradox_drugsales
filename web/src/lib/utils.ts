@@ -10,6 +10,7 @@ export enum NuiState {
 
 export const nuiState = writable(NuiState.Closed);
 export const dataState = writable();
+export const questsState = writable(true);
 
 export const closeNui = (result?: 'confirmed' | 'negotiate' | boolean, price?: number) => {
     const wrapper = document.querySelector('.wrapper') as HTMLElement;

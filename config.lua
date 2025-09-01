@@ -197,6 +197,7 @@ Config.Dealers = {
 ---@class Quests
 ---@field amount number
 ---@field daily QuestsData
+---@field disabled boolean?
 
 ---@type Quests
 Config.Quests = {

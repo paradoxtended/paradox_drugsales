@@ -1,9 +1,11 @@
 <script lang="ts">
-import { dataState } from "$lib/utils";
+import { dataState, questsState } from "$lib/utils";
 import { fetchNui } from "$lib/utils/fetchNui";
 import { fade } from "svelte/transition";
 import Loader from "./Loader.svelte";
 import { isEnvBrowser } from "$lib/utils/misc";
+import imageDaily from "$lib/images/daily.png";
+import imageWeekly from "$lib/images/weekly.png";
 
 interface User {
     identifier: string;
@@ -42,7 +44,7 @@ let pageSize: number = 5;
 
 let loading: boolean = $state(false);
 let time: string = $state('08:42 AM');
-let TAB: 'home' | 'profile' | 'challenges' = $state('home');
+let TAB: 'home' | 'profile' | 'challenges' | 'quests' = $state('home');
 let searchQuery: string = $state('');
 let Users: ExtendedUser[] = $state([]);
 let Challenges: Challenge[] | undefined = $state(isEnvBrowser() ? [{ title: 'Sell 4/5 Meth bag ($500)', description: 'Sell specified drug.', progress: 50, claimed: false }] : undefined);
@@ -53,6 +55,7 @@ let PAGE: number = $state(1);
 let totalPages = $state(1);
 let profile: ExtendedUser | undefined = $state();
 let SettingType: 'imageUrl' | 'nickname' | undefined = $state();
+let questType: 'daily' | 'weekly' = $state('daily');
 
 $effect(() => {
     const sorted = [...data.users].sort((a, b) => {
@@ -166,13 +169,25 @@ async function editProfile() {
     box.className = 'fa-solid fa-check';
 }
 
-async function openChallenges(user?: ExtendedUser) {
+function openChallenges(user?: ExtendedUser) {
     const player = user || Player;
 
     profile = player as ExtendedUser;
     TAB = 'challenges';
+}
 
-    const response: Challenge[] = await fetchNui('getQuests', profile.identifier)
+async function getQuests(type: 'daily' | 'weekly') {
+    if (!profile) 
+        return
+
+    TAB = 'quests';
+    questType = type;
+
+    const response: Challenge[] = await fetchNui('getQuests', {
+        identifier: profile.identifier,
+        type: type
+    })
+
     Challenges = response;
 }
 
@@ -201,7 +216,7 @@ async function handleChallenge(type: 'refresh' | 'claim', id: number) {
                 <i class="fa-solid fa-house" onclick={() => TAB = 'home'}></i>
             </div>
             <div>
-                <i class="fa-solid fa-briefcase" onclick={() => openChallenges()}></i>
+                {#if $questsState}<i class="fa-solid fa-briefcase" onclick={() => openChallenges()}></i>{/if}
                 <i class="fa-solid fa-user" onclick={() => openProfile()}></i>
             </div>
         </div>
@@ -299,9 +314,9 @@ async function handleChallenge(type: 'refresh' | 'claim', id: number) {
                             </div>
                             <p class="text-[16px] text-gray-400 font-light leading-4">Last active {profile.stats.lastActive}</p>
                             <p class="text-[16px] text-gray-400 font-light">Dealer's reputation {Number(profile.stats.reputation.toFixed(2)).toString()} rep</p>
-                            {#if profile.myself || data.admin}
+                            {#if (profile.myself || data.admin) && $questsState}
                                 <button class="bg-neutral-900 text-sm font-light px-5 py-0.5 rounded-full border border-neutral-700 mt-1 hover:bg-neutral-800 duration-300"
-                                    onclick={() => openChallenges(profile)}>Daily Challenges</button>
+                                    onclick={() => openChallenges(profile)}>Challenges</button>
                             {/if}
                         </div>
                         <div class="lb-profile-position">
@@ -356,9 +371,40 @@ async function handleChallenge(type: 'refresh' | 'claim', id: number) {
         {#key Challenges}
             {#if TAB === 'challenges' && profile && Challenges && !loading}
                 <div class="px-5 py-3 relative" in:fade>
-                    <div>
-                        <p class="text-[30px] leading-9">Daily challenges</p>
-                        <p class="text-gray-400">Check {profile.nickname}'s daily challenges</p>
+                    <div class="flex items-center justify-center h-[350px]">
+                        <div class="flex items-center justify-center flex-col gap-3 cursor-pointer bg-[radial-gradient(#000000a0,#00000000_65%)] w-full h-full
+                            hover:shadow-[0_0_5px_#84cc16] transition-all"
+                            onclick={() => getQuests('daily')}>
+                            <img src={imageDaily} class="w-[150px] h-[150px]" />
+                            <div class="flex items-center justify-center flex-col">
+                                <p class="text-xl">Daily Challenges</p>
+                                <p class="text-gray-400">Check {profile.nickname}'s current daily challenges.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-center flex-col gap-3 cursor-pointer bg-[radial-gradient(#000000a0,#00000000_65%)] w-full h-full
+                            hover:shadow-[0_0_5px_#84cc16] transition-all"
+                            onclick={() => getQuests('weekly')}>
+                            <img src={imageWeekly} class="w-[150px] h-[150px]" />
+                            <div class="flex items-center justify-center flex-col">
+                                <p class="text-xl">Weekly Challenges</p>
+                                <p class="text-gray-400">Check {profile.nickname}'s current weekly challenges.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {/if}
+
+            {#if TAB === 'quests' && profile && Challenges && !loading}
+                <div class="px-5 py-3 relative" in:fade>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-[30px] leading-9">{questType.charAt(0).toUpperCase() + questType.slice(1)} challenges</p>
+                            <p class="text-gray-400">Check {profile.nickname}'s {questType} challenges</p>
+                        </div>
+                        <div class="border border-lime-500 w-8 h-8 rounded-full flex items-center justify-center cursor-pointer bg-lime-500/10 hover:bg-lime-500/25 duration-300"
+                        onclick={() => TAB = 'challenges'}>
+                            <i class="hgi hgi-stroke hgi-arrow-turn-backward"></i>
+                        </div>
                     </div>
 
                     <div class="flex flex-col gap-1 mt-3 h-[290px] overflow-auto -mr-2.5 pr-2.5">
