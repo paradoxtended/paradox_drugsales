@@ -38,6 +38,5 @@ ui_page 'web/dist/index.html'
 files {
     'locales/*.json',
     'web/dist/index.html',
-    'web/dist/assets/*.js',
-    'web/dist/assets/*.css',
+    'web/dist/assets/*',
 }

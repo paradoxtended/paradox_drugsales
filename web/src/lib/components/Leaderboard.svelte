@@ -198,7 +198,7 @@ async function handleChallenge(type: 'refresh' | 'claim', id: number) {
 
     box.className = 'loader';
 
-    const response: Challenge[] = await fetchNui(type + 'Quest', { identifier: profile.identifier, id: id })
+    const response: Challenge[] = await fetchNui(type + 'Quest', { identifier: profile.identifier, id: id, type: questType })
     
     if (response) 
         Challenges = response
@@ -369,7 +369,7 @@ async function handleChallenge(type: 'refresh' | 'claim', id: number) {
         {/if}
 
         {#key Challenges}
-            {#if TAB === 'challenges' && profile && Challenges && !loading}
+            {#if TAB === 'challenges' && profile && !loading}
                 <div class="px-5 py-3 relative" in:fade>
                     <div class="flex items-center justify-center h-[350px]">
                         <div class="flex items-center justify-center flex-col gap-3 cursor-pointer bg-[radial-gradient(#000000a0,#00000000_65%)] w-full h-full

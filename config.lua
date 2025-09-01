@@ -197,6 +197,7 @@ Config.Dealers = {
 ---@class Quests
 ---@field amount number
 ---@field daily QuestsData
+---@field weekly QuestsData
 ---@field disabled boolean?
 
 ---@type Quests
@@ -206,6 +207,10 @@ Config.Quests = {
         multiplier = { amount = 5, price = 0.5 },
         refreshCount = 3,
         account = 'money'
+    },
+    weekly = {
+        multiplier = { amount = 20, price = 1.25 },
+        refreshCount = 1,
     }
 }
 

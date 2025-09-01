@@ -34,11 +34,11 @@ RegisterNUICallback('getQuests', function(data, cb)
     cb(quests)
 end)
 
----@param data { identifier: string, id: number }
+---@param data { identifier: string, id: number, type: 'daily' | 'weekly'  }
 RegisterNUICallback('refreshQuest', function(data, cb)
-    local identifier, id in data
+    local identifier, id, type in data
 
-    local newQuests = lib.callback.await('prp_drugsales:refreshQuest', false, identifier, id)
+    local newQuests = lib.callback.await('prp_drugsales:refreshQuest', false, identifier, id, type)
 
     if not newQuests then
         Config.Notify(locale('quest_cant_refresh'), 'error')
@@ -51,11 +51,11 @@ RegisterNUICallback('refreshQuest', function(data, cb)
     cb(quests)
 end)
 
----@param data { identifier: string, id: number }
+---@param data { identifier: string, id: number, type: 'daily' | 'weekly' }
 RegisterNUICallback('claimQuest', function(data, cb)
-    local identifier, id in data
+    local identifier, id, type in data
 
-    local newQuests, msg = lib.callback.await('prp_drugsales:claimQuest', false, identifier, id)
+    local newQuests, msg = lib.callback.await('prp_drugsales:claimQuest', false, identifier, id, type)
 
     if newQuests then
         Config.Notify(msg, 'success')

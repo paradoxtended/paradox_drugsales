@@ -3,6 +3,7 @@ local createQuery = [[
         `identifier` varchar(50) NOT NULL,
         `reputation` float NOT NULL,
         `data` longtext NOT NULL,
+        `quests` longtext NOT NULL,
         PRIMARY KEY (`identifier`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 ]]
@@ -12,16 +13,18 @@ local reps = {}
 
 MySQL.ready(function()
     MySQL.query.await(createQuery)
+    local weeklyQuests = initWeeklyQuests()
     
     local data = MySQL.query.await('SELECT * FROM prp_drugsales')
 
     for _, entry in ipairs(data) do
         reps[entry.identifier] = entry.reputation
+        weeklyQuests[entry.identifier] = entry.quests and json.decode(entry.quests) or {}
     end
 end)
 
 local function save()
-    local query = 'UPDATE prp_drugsales SET reputation = ? WHERE identifier = ?'
+    local query = 'UPDATE prp_drugsales SET reputation = ?, quests = ? WHERE identifier = ?'
     local parameters = {}
     local size = 0
 
@@ -29,6 +32,7 @@ local function save()
         size += 1
         parameters[size] = {
             rep,
+            json.encode(getPlayerWeeklyQuests(identifier)),
             identifier
         }
     end
