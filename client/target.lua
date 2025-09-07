@@ -1,4 +1,5 @@
 local IsEntityDead = IsEntityDead
+local GetEntityPopulationType = GetEntityPopulationType
 
 -- Store NPCs so player won't be able to sell to one NPC forever
 local cachedPeds = {}
@@ -15,6 +16,7 @@ exports.ox_target:addGlobalPed({
         and not IsEntityDead(entity)
         and not prp.progressActive()
         and entity ~= getDealersPed()
+        and GetEntityPopulationType(entity) ~= 7
     end,
     onSelect = function(data)
         cachedPeds[data.entity] = true
